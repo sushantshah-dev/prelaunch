@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if status_message %}
+    <div class="success">{{ status_message }}</div>
+  {% endif %}
+
+  <article class="panel prompt-card">
+    <div class="prompt-card-inner">
+      <div>
+        <div class="meta">Independent test</div>
+        <h2>Start a test.</h2>
+      </div>
+
+      <form class="form prompt-form" method="post" action="{{ base_path }}/tests">
+        <div class="field">
+          <label for="mode">Mode</label>
+          <select id="mode" name="mode" class="select-field">
+            <option value="idea"{% if selected_mode == "idea" %} selected{% endif %}>Idea Test</option>
+            <option value="live_signals"{% if selected_mode == "live_signals" %} selected{% endif %}{% if not has_live_signals %} disabled{% endif %}>Live Signals{% if not has_live_signals %} · Starter{% endif %}</option>
+            <option value="perception"{% if selected_mode == "perception" %} selected{% endif %}{% if not has_pro_features %} disabled{% endif %}>Perception Test{% if not has_pro_features %} · Pro{% endif %}</option>
+            <option value="spread"{% if selected_mode == "spread" %} selected{% endif %}{% if not has_pro_features %} disabled{% endif %}>Spread Simulation{% if not has_pro_features %} · Pro{% endif %}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prompt">Prompt</label>
+          <textarea id="prompt" name="prompt" rows="8" placeholder="Describe the idea you want to test..." required></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="button primary" type="submit">Create Test</button>
+        </div>
+      </form>
+    </div>
+  </article>
+{% endblock %}
