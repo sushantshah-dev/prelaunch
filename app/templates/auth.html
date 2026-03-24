@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form class="form" method="post" action="{{ base_path }}/{{ mode }}">
+    {% if mode == "signup" %}
+      <input type="hidden" name="plan" value="{{ plan }}">
+    {% endif %}
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ values.email or '' }}" required>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" minlength="8" required>
+    </div>
+
+    <div class="actions">
+      <button class="button primary" type="submit">
+        {% if mode == "signup" %}Create Account{% else %}Log In{% endif %}
+      </button>
+    </div>
+
+    <div class="helper">
+      {% if mode == "signup" %}
+        Already have an account? <a href="{{ base_path }}/login">Log in</a>
+      {% else %}
+        Need an account? <a href="{{ base_path }}/signup">Create one</a>
+      {% endif %}
+    </div>
+  </form>
+{% endblock %}

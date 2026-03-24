@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  web:
+    image: nginx:alpine
+    container_name: prelaunch-landing
+    ports:
+      - "8080:80"
+    volumes:
+      - ./landing:/usr/share/nginx/html:ro
+      - ./landing/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - prelaunch-net
+  app:
+    build:
+      context: ./app
+    container_name: prelaunch-app
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://prelaunch:prelaunch@db:5432/prelaunch
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - prelaunch-net
+  db:
+    image: postgres:16-alpine
+    container_name: prelaunch-db
+    environment:
+      POSTGRES_DB: prelaunch
+      POSTGRES_USER: prelaunch
+      POSTGRES_PASSWORD: prelaunch
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./app/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prelaunch -d prelaunch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - prelaunch-net
+networks:
+  prelaunch-net:
+    driver: bridge
+volumes:
+  postgres-data:

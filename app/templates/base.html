@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ base_path }}/static/app.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="/index.html">Prelaunch / app</a>
+    </div>
+    <div class="shell">
+      <div class="page-copy">
+        {% if eyebrow %}<div class="eyebrow">{{ eyebrow }}</div>{% endif %}
+        {% if heading %}<h1>{{ heading }}</h1>{% endif %}
+        {% if subtext %}<p class="subtext">{{ subtext }}</p>{% endif %}
+      </div>
+      <section class="panel card">
+        {% block content %}{% endblock %}
+      </section>
+    </div>
+  </div>
+</body>
+</html>
