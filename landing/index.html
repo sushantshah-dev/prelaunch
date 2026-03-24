@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prelaunch</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-soft: rgba(255, 255, 255, 0.03);
+      --surface: rgba(10, 10, 14, 0.88);
+      --surface-strong: rgba(15, 15, 20, 0.96);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.96);
+      --muted: rgba(255, 255, 255, 0.62);
+      --soft: rgba(255, 255, 255, 0.42);
+      --blue: #76a7ff;
+      --purple: #9c7cff;
+      --glow: rgba(118, 167, 255, 0.24);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --container: 1200px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(118, 167, 255, 0.16), transparent 26%),
+        radial-gradient(circle at 80% 18%, rgba(156, 124, 255, 0.16), transparent 28%),
+        linear-gradient(180deg, #08080a 0%, #050505 35%, #040404 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, transparent 45%, rgba(0, 0, 0, 0.42) 100%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.018) 0,
+          rgba(255, 255, 255, 0.018) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      opacity: 0.34;
+      mix-blend-mode: screen;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      transition: background 220ms ease, border-color 220ms ease, backdrop-filter 220ms ease, box-shadow 220ms ease;
+    }
+
+    .nav.scrolled {
+      background: rgba(7, 7, 10, 0.56);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+    }
+
+    .nav-inner,
+    .section-inner,
+    .hero-inner,
+    .final-cta-inner {
+      width: min(calc(100% - 32px), var(--container));
+      margin: 0 auto;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+    }
+
+    .brand {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand span {
+      color: var(--soft);
+      font-weight: 500;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      transition: color 180ms ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 180ms ease, filter 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+      will-change: transform;
+    }
+
+    .button:hover {
+      transform: translateY(-1px) scale(1.02);
+      filter: brightness(1.08);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, rgba(118, 167, 255, 0.22), rgba(156, 124, 255, 0.18));
+      border-color: rgba(148, 168, 255, 0.34);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 10px 30px rgba(118, 167, 255, 0.2);
+    }
+
+    .button.secondary {
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .button.nav-cta {
+      min-height: 40px;
+      padding: 0 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: clip;
+      padding: 36px 0 80px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(60px);
+      opacity: 0.55;
+      will-change: transform;
+    }
+
+    .orb.one {
+      width: 34vw;
+      height: 34vw;
+      min-width: 280px;
+      min-height: 280px;
+      background: radial-gradient(circle, rgba(118, 167, 255, 0.3) 0%, rgba(118, 167, 255, 0.06) 48%, transparent 72%);
+      top: 12%;
+      left: 8%;
+    }
+
+    .orb.two {
+      width: 30vw;
+      height: 30vw;
+      min-width: 240px;
+      min-height: 240px;
+      background: radial-gradient(circle, rgba(156, 124, 255, 0.26) 0%, rgba(156, 124, 255, 0.05) 50%, transparent 72%);
+      top: 4%;
+      right: 6%;
+    }
+
+    .orb.three {
+      width: 42vw;
+      height: 42vw;
+      min-width: 320px;
+      min-height: 320px;
+      background: radial-gradient(circle, rgba(120, 200, 255, 0.12) 0%, rgba(120, 200, 255, 0.04) 44%, transparent 76%);
+      bottom: -12%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .hero-inner {
+      position: relative;
+      width: min(calc(100% - 32px), 1120px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-content {
+      width: min(100%, 900px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      margin-bottom: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(14px);
+      color: var(--muted);
+      font-size: 0.88rem;
+      letter-spacing: -0.02em;
+    }
+
+    .eyebrow strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3.4rem, 8vw, 6.9rem);
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+      font-weight: 700;
+      text-wrap: balance;
+    }
+
+    .accent {
+      display: inline-block;
+      background: linear-gradient(120deg, #d5e5ff 5%, #87b2ff 48%, #c9baff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 22px rgba(126, 166, 255, 0.12);
+    }
+
+    .subtext {
+      width: min(100%, 720px);
+      margin: 24px auto 0;
+      font-size: clamp(1.04rem, 2vw, 1.25rem);
+      line-height: 1.6;
+      color: var(--muted);
+      letter-spacing: -0.02em;
+    }
+
+    .hero-actions {
+      width: min(100%, 720px);
+      margin: 32px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .input-shell {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 24px 70px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(16px);
+    }
+
+    .idea-input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: none;
+      color: var(--text);
+      background: transparent;
+      padding: 0 10px 0 16px;
+      font-size: 1rem;
+    }
+
+    .idea-input::placeholder {
+      color: rgba(255, 255, 255, 0.36);
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-console {
+      width: min(100%, 980px);
+      margin-top: 46px;
+      position: relative;
+      transform: translateY(10%);
+    }
+
+    .console-shell {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+        rgba(8, 8, 12, 0.94);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 30px 90px rgba(0, 0, 0, 0.48),
+        0 0 0 1px rgba(118, 167, 255, 0.05);
+    }
+
+    .console-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(118, 167, 255, 0.08), transparent 30%, transparent 70%, rgba(156, 124, 255, 0.08));
+      pointer-events: none;
+    }
+
+    .console-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .console-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--soft);
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .console-dots {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .console-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .console-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(188, 220, 255, 0.82);
+    }
+
+    .status-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8ab2ff;
+      box-shadow: 0 0 16px rgba(138, 178, 255, 0.72);
+      animation: pulse 2.8s infinite ease-in-out;
+    }
+
+    .console-body {
+      padding: 28px 24px 34px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: rgba(243, 246, 255, 0.92);
+    }
+
+    .prompt-line,
+    .stream-line {
+      white-space: pre-wrap;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .prompt-line.visible,
+    .stream-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 420ms ease, transform 420ms ease;
+    }
+
+    .label {
+      color: rgba(134, 168, 255, 0.94);
+    }
+
+    .muted {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 1.1em;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      background: rgba(255, 255, 255, 0.9);
+      animation: blink 1s step-end infinite;
+    }
+
+    .section {
+      position: relative;
+      padding: 120px 0;
+    }
+
+    .section-inner {
+      position: relative;
+    }
+
+    .section-label {
+      color: rgba(255, 255, 255, 0.44);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.76rem;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      letter-spacing: -0.05em;
+      line-height: 1.02;
+      max-width: 760px;
+      text-wrap: balance;
+    }
+
+    .section-copy {
+      margin: 18px 0 0;
+      max-width: 660px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .steps {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .step {
+      padding: 28px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018));
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: var(--shadow);
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(199, 218, 255, 0.9);
+      font-size: 0.85rem;
+    }
+
+    .step h3 {
+      margin: 0 0 12px;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .live-signals {
+      padding-top: 56px;
+    }
+
+    .live-signals-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .live-signals-grid.reverse {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+
+    .signal-points {
+      margin: 28px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 14px;
+      max-width: 600px;
+    }
+
+    .signal-points li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.65;
+    }
+
+    .signal-points li::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      margin-top: 11px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(118, 167, 255, 0.95), rgba(156, 124, 255, 0.82));
+      box-shadow: 0 0 18px rgba(118, 167, 255, 0.28);
+    }
+
+    .research-card {
+      position: relative;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
+        rgba(8, 8, 11, 0.92);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 28px 80px rgba(0, 0, 0, 0.42);
+      overflow: hidden;
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .research-card:hover {
+      transform: translateY(-2px) scale(1.01);
+      border-color: rgba(118, 167, 255, 0.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 32px 95px rgba(0, 0, 0, 0.48),
+        0 0 30px rgba(118, 167, 255, 0.08);
+    }
+
+    .research-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(118, 167, 255, 0.08), transparent 30%),
+        linear-gradient(160deg, rgba(255, 255, 255, 0.025), transparent 36%);
+      pointer-events: none;
+    }
+
+    .research-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .research-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.84rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .research-title strong {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .research-body {
+      position: relative;
+      z-index: 1;
+      padding: 24px 22px 22px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .source-quote {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .source-quote:last-child {
+      border-bottom: 0;
+      padding-bottom: 6px;
+    }
+
+    .source-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: rgba(160, 190, 255, 0.9);
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .source-label::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(138, 178, 255, 0.9);
+      box-shadow: 0 0 16px rgba(138, 178, 255, 0.36);
+    }
+
+    .source-quote p {
+      margin: 0;
+      color: rgba(240, 244, 255, 0.9);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      max-width: 46ch;
+    }
+
+    .research-footer {
+      margin-top: 18px;
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .feature-card.perception-card::before,
+    .feature-card.perception-card.research-card::before {
+      background:
+        radial-gradient(circle at top right, rgba(118, 167, 255, 0.1), transparent 28%),
+        linear-gradient(155deg, rgba(255, 255, 255, 0.025), transparent 38%);
+    }
+
+    .feature-card.spread-card::before,
+    .feature-card.spread-card.research-card::before {
+      background:
+        radial-gradient(circle at top left, rgba(156, 124, 255, 0.1), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+    }
+
+    .persona-card .research-card::before,
+    .persona-card.research-card::before {
+      background:
+        radial-gradient(circle at top left, rgba(156, 124, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 36%);
+    }
+
+    .persona-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .persona-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 150px) 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .persona-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 4px;
+    }
+
+    .persona-key {
+      color: rgba(167, 190, 255, 0.82);
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .persona-value {
+      color: rgba(243, 246, 255, 0.9);
+      font-size: 0.94rem;
+      line-height: 1.75;
+    }
+
+    .persona-note {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .terminal-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .terminal-block {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .terminal-block:last-child {
+      border-bottom: 0;
+      padding-bottom: 4px;
+    }
+
+    .terminal-kicker {
+      margin-bottom: 8px;
+      color: rgba(168, 193, 255, 0.86);
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .terminal-text {
+      color: rgba(242, 245, 255, 0.9);
+      font-size: 0.94rem;
+      line-height: 1.72;
+    }
+
+    .terminal-arrow {
+      display: inline-block;
+      margin-top: 7px;
+      color: rgba(255, 255, 255, 0.56);
+    }
+
+    .terminal-divider {
+      color: rgba(255, 255, 255, 0.24);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .showcase {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 26px;
+      align-items: stretch;
+      margin-top: 46px;
+    }
+
+    .pricing-grid {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .pricing-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      padding: 30px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-2px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 34px 95px rgba(0, 0, 0, 0.44);
+    }
+
+    .pricing-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 36%);
+    }
+
+    .pricing-card.featured {
+      background:
+        radial-gradient(circle at top, rgba(118, 167, 255, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border-color: rgba(118, 167, 255, 0.2);
+      transform: scale(1.03);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 30px 90px rgba(0, 0, 0, 0.46),
+        0 0 40px rgba(118, 167, 255, 0.08);
+    }
+
+    .pricing-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .pricing-header {
+      display: grid;
+      gap: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pricing-tier {
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 1.1rem;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+    }
+
+    .pricing-subtitle {
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 28ch;
+    }
+
+    .pricing-price {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      letter-spacing: -0.06em;
+    }
+
+    .pricing-price strong {
+      font-size: clamp(2.7rem, 5vw, 4rem);
+      line-height: 0.95;
+    }
+
+    .pricing-price span {
+      color: rgba(255, 255, 255, 0.56);
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .pricing-body {
+      display: grid;
+      gap: 18px;
+      flex: 1;
+      align-content: start;
+    }
+
+    .pricing-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.74);
+      line-height: 1.6;
+    }
+
+    .pricing-list li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .pricing-list ion-icon {
+      flex: 0 0 auto;
+      width: 16px;
+      height: 16px;
+      margin-top: 4px;
+      color: rgba(168, 193, 255, 0.92);
+    }
+
+    .pricing-note {
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .pricing-intro {
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.9rem;
+      letter-spacing: 0.01em;
+    }
+
+    .pricing-group {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pricing-list.locked {
+      color: rgba(255, 255, 255, 0.34);
+    }
+
+    .pricing-list.locked ion-icon {
+      color: rgba(255, 255, 255, 0.22);
+    }
+
+    .pricing-footer {
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pricing-footer.spacious {
+      margin-top: 18px;
+    }
+
+    .pricing-cta {
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .insight-card,
+    .signal-card {
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .signal-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .signal-title {
+      color: rgba(255, 255, 255, 0.54);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .metric {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric-value {
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      letter-spacing: -0.07em;
+      line-height: 0.95;
+    }
+
+    .metric-copy {
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 26ch;
+    }
+
+    .mini-bars {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-bars div {
+      display: grid;
+      gap: 7px;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.9rem;
+    }
+
+    .mini-bars span {
+      display: block;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mini-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(118, 167, 255, 0.75), rgba(156, 124, 255, 0.75));
+      box-shadow: 0 0 22px rgba(118, 167, 255, 0.18);
+    }
+
+    .final-cta {
+      padding: 40px 0 120px;
+    }
+
+    .final-cta-inner {
+      position: relative;
+      padding: 52px;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        radial-gradient(circle at top left, rgba(118, 167, 255, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(156, 124, 255, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+      box-shadow: var(--shadow);
+    }
+
+    .final-cta-inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 35%, transparent 65%, rgba(255, 255, 255, 0.025));
+      pointer-events: none;
+    }
+
+    .final-cta-content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+
+    .final-cta-content h2 {
+      margin: 0;
+      font-size: clamp(2.1rem, 4vw, 3.6rem);
+      letter-spacing: -0.06em;
+      line-height: 1;
+    }
+
+    .final-cta-content p {
+      margin: 16px 0 28px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 56ch;
+    }
+
+    .footer {
+      width: min(calc(100% - 32px), var(--container));
+      margin: 0 auto;
+      padding: 0 0 34px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: rgba(255, 255, 255, 0.38);
+      font-size: 0.92rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.5);
+      transition: color 180ms ease;
+    }
+
+    .footer-links a:hover {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.92); opacity: 0.7; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
+    @media (max-width: 960px) {
+      .live-signals-grid,
+      .live-signals-grid.reverse,
+      .pricing-grid,
+      .showcase,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .live-signals-grid.reverse > :first-child {
+        order: 2;
+      }
+
+      .live-signals-grid.reverse > :last-child {
+        order: 1;
+      }
+
+      .hero-console {
+        transform: translateY(5%);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .nav-links a:not(.button) {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 18px;
+      }
+
+      .hero-actions,
+      .input-shell {
+        align-items: stretch;
+      }
+
+      .input-shell {
+        flex-direction: column;
+        border-radius: 24px;
+        padding: 14px;
+      }
+
+      .idea-input {
+        padding: 4px 2px 0;
+      }
+
+      .cta-row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .console-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .research-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .persona-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .pricing-card.featured {
+        transform: none;
+      }
+
+      .final-cta-inner {
+        padding: 34px 24px;
+      }
+
+      .footer {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav" id="nav">
+      <div class="nav-inner">
+        <a href="#top" class="brand">Prelaunch <span>/ signal before shipping</span></a>
+        <div class="nav-links">
+          <a href="#how-it-works">How it works</a>
+          <a href="#examples">Examples</a>
+          <a href="#pricing">Pricing</a>
+          <a href="/app/signup" class="button nav-cta">Try it</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true">
+          <div class="orb one"></div>
+          <div class="orb two"></div>
+          <div class="orb three"></div>
+        </div>
+
+        <div class="hero-inner">
+          <div class="hero-content">
+            <div class="eyebrow" data-hero>
+              <strong>NEW</strong>
+              <span>Idea validation, reimagined</span>
+            </div>
+
+            <h1 data-hero>
+              See what people think
+              <span class="accent">before you build</span>
+            </h1>
+
+            <p class="subtext" data-hero>
+              Drop your idea. Get reactions, objections, and willingness to pay in seconds.
+            </p>
+
+            <div class="hero-actions" data-hero>
+              <div class="input-shell">
+                <input
+                  id="ideaInput"
+                  class="idea-input"
+                  type="text"
+                  value="An AI trip planner that builds weekend getaways from your calendar and budget."
+                  aria-label="Describe your idea"
+                  placeholder="Paste an idea to simulate audience reactions"
+                >
+                <button id="testIdeaButton" class="button primary" type="button">Test Idea</button>
+              </div>
+
+              <div class="cta-row">
+                <button class="button secondary" id="watchDemoButton" type="button">Watch Demo</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-console" data-hero>
+            <div class="console-shell">
+              <div class="console-topbar">
+                <div class="console-meta">
+                  <div class="console-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <span>Live audience simulation</span>
+                </div>
+                <div class="console-status">
+                  <span class="status-pulse"></span>
+                  <span id="consoleStatus">Streaming market reactions</span>
+                </div>
+              </div>
+              <div class="console-body" id="heroConsole" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section live-signals" id="live-signals">
+        <div class="section-inner">
+          <div class="live-signals-grid">
+            <div>
+              <div class="section-label" data-reveal>Live signals</div>
+              <h2 class="section-title" data-reveal>See what people already think</h2>
+              <p class="section-copy" data-reveal>
+                We analyze real conversations from across the internet, forums, social media, and communities to surface how people actually feel about ideas like yours.
+              </p>
+              <ul class="signal-points">
+                <li data-reveal>Real user opinions from forums and social platforms</li>
+                <li data-reveal>Common objections and pain points</li>
+                <li data-reveal>Signals of demand and willingness to pay</li>
+                <li data-reveal>Trends across similar ideas</li>
+              </ul>
+            </div>
+
+            <aside class="research-card" data-reveal>
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="console-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Context scan</strong>
+                </div>
+                <div class="console-status">
+                  <span class="status-pulse"></span>
+                  <span>Real-world category signals</span>
+                </div>
+              </div>
+
+              <div class="research-body">
+                <article class="source-quote" data-quote>
+                  <div class="source-label">Reddit</div>
+                  <p>"Most study planner apps feel too rigid and hard to stick with."</p>
+                </article>
+                <article class="source-quote" data-quote>
+                  <div class="source-label">Twitter</div>
+                  <p>"People do not want more planning tools. They want automation that quietly handles the work."</p>
+                </article>
+                <article class="source-quote" data-quote>
+                  <div class="source-label">Indie Hackers</div>
+                  <p>"Retention is the biggest problem in this category. Interest is easy. Habits are hard."</p>
+                </article>
+                <div class="research-footer">Cross-source synthesis ready</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-inner">
+          <div class="live-signals-grid reverse">
+            <aside class="research-card persona-card" data-reveal>
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="console-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Simulation engine</strong>
+                </div>
+                <div class="console-status">
+                  <span class="status-pulse"></span>
+                  <span>Perception model assembled</span>
+                </div>
+              </div>
+
+              <div class="research-body">
+                <div class="persona-stack">
+                  <article class="persona-row" data-persona>
+                    <div class="persona-key">Age range</div>
+                    <div class="persona-value">22-29, early-career, digitally fluent, likely to judge value within the first few moments of the pitch.</div>
+                  </article>
+                  <article class="persona-row" data-persona>
+                    <div class="persona-key">Financials</div>
+                    <div class="persona-value">$1.8k-$3.5k monthly discretionary budget, price-aware but responsive when the value proposition feels concrete.</div>
+                  </article>
+                  <article class="persona-row" data-persona>
+                    <div class="persona-key">Perception cue</div>
+                    <div class="persona-value">Interprets the product as useful when it reduces friction immediately, not when it promises long-term potential.</div>
+                  </article>
+                  <article class="persona-row" data-persona>
+                    <div class="persona-key">Risk signal</div>
+                    <div class="persona-value">High skepticism toward generic AI claims, but stronger intent when outcomes feel specific, measurable, and easy to trust.</div>
+                  </article>
+                </div>
+                <div class="persona-note">Synthetic personas calibrated to predict market perception</div>
+              </div>
+            </aside>
+
+            <div>
+              <div class="section-label" data-reveal>Simulation engine</div>
+              <h2 class="section-title" data-reveal>Predict how the market will perceive your idea</h2>
+              <p class="section-copy" data-reveal>
+                Our simulation engine identifies the likely target audience for an idea, then models how different people will interpret, trust, question, and value it before you ship.
+              </p>
+              <ul class="signal-points">
+                <li data-reveal>Identifies who the market is most likely to see this product as being for</li>
+                <li data-reveal>Generates distinct personalities across age, financial profile, habits, and urgency</li>
+                <li data-reveal>Predicts which segments will lean in, hesitate, or dismiss the idea</li>
+                <li data-reveal>Helps you refine messaging, pricing, and positioning around expected perception</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-inner">
+          <div class="live-signals-grid">
+            <div>
+              <div class="section-label" data-reveal>Perception test</div>
+              <h2 class="section-title" data-reveal>Know how your messaging will land</h2>
+              <p class="section-copy" data-reveal>
+                Test your ads, landing pages, and copy before you spend. See how different people interpret, trust, or ignore your message.
+              </p>
+              <ul class="signal-points">
+                <li data-reveal>First impressions across personas</li>
+                <li data-reveal>Emotional reactions and trust signals</li>
+                <li data-reveal>Click likelihood and confusion points</li>
+                <li data-reveal>What makes users ignore or engage</li>
+              </ul>
+            </div>
+
+            <aside class="research-card feature-card perception-card" data-reveal>
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="console-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Perception test</strong>
+                </div>
+                <div class="console-status">
+                  <span class="status-pulse"></span>
+                  <span>Message interpretation map</span>
+                </div>
+              </div>
+              <div class="research-body">
+                <div class="terminal-stack">
+                  <article class="terminal-block" data-perception>
+                    <div class="terminal-kicker">Ad</div>
+                    <div class="terminal-text">"AI that plans your day automatically"</div>
+                  </article>
+                  <article class="terminal-block" data-perception>
+                    <div class="terminal-kicker">Student, 19</div>
+                    <div class="terminal-text">"Sounds useful but I wouldn't pay"</div>
+                    <div class="terminal-arrow">-&gt; Ignores</div>
+                  </article>
+                  <article class="terminal-block" data-perception>
+                    <div class="terminal-kicker">Founder, 30</div>
+                    <div class="terminal-text">"Interesting, but unclear how it works"</div>
+                    <div class="terminal-arrow">-&gt; Might click</div>
+                  </article>
+                  <article class="terminal-block" data-perception>
+                    <div class="terminal-kicker">Designer, 24</div>
+                    <div class="terminal-text">"Feels generic"</div>
+                    <div class="terminal-arrow">-&gt; Low interest</div>
+                  </article>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-inner">
+          <div class="live-signals-grid reverse">
+            <aside class="research-card feature-card spread-card" data-reveal>
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="console-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Spread simulation</strong>
+                </div>
+                <div class="console-status">
+                  <span class="status-pulse"></span>
+                  <span>Word-of-mouth pathway</span>
+                </div>
+              </div>
+              <div class="research-body">
+                <div class="terminal-stack">
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">Original</div>
+                    <div class="terminal-text">"AI that plans your day"</div>
+                  </article>
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">User A</div>
+                    <div class="terminal-text">"It automates your schedule"</div>
+                  </article>
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">User B</div>
+                    <div class="terminal-text">"Another productivity app"</div>
+                  </article>
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">User C</div>
+                    <div class="terminal-text">"Not sure what it actually does"</div>
+                  </article>
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">Outcome</div>
+                    <div class="terminal-text">Low spread, weak clarity</div>
+                  </article>
+                  <article class="terminal-block" data-spread>
+                    <div class="terminal-kicker">Suggested fix</div>
+                    <div class="terminal-text">Sharpen hook. Add clear outcome. Increase novelty.</div>
+                  </article>
+                </div>
+              </div>
+            </aside>
+
+            <div>
+              <div class="section-label" data-reveal>Spread simulation</div>
+              <h2 class="section-title" data-reveal>See how your idea spreads</h2>
+              <p class="section-copy" data-reveal>
+                Watch how people describe your idea to others, how the message changes, and whether it spreads or dies.
+              </p>
+              <ul class="signal-points">
+                <li data-reveal>Simulated word-of-mouth propagation</li>
+                <li data-reveal>Message distortion across users</li>
+                <li data-reveal>Virality likelihood</li>
+                <li data-reveal>Suggested improvements to increase spread</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works">
+        <div class="section-inner">
+          <div class="section-label" data-reveal>How it works</div>
+          <h2 class="section-title" data-reveal>Turn a rough concept into sharp market signal before a single sprint begins.</h2>
+          <p class="section-copy" data-reveal>
+            Prelaunch compresses early research into one fast loop so you can hear the likely yes, no, and maybe from the people you actually need to win over.
+          </p>
+
+          <div class="steps">
+            <article class="step" data-reveal>
+              <div class="step-number">01</div>
+              <h3>Drop the idea</h3>
+              <p>Paste a concept, positioning line, or product note. Even half-formed thoughts are enough to start.</p>
+            </article>
+
+            <article class="step" data-reveal>
+              <div class="step-number">02</div>
+              <h3>Simulate the room</h3>
+              <p>Prelaunch generates audience reactions across intent, skepticism, urgency, and willingness to pay.</p>
+            </article>
+
+            <article class="step" data-reveal>
+              <div class="step-number">03</div>
+              <h3>Decide with signal</h3>
+              <p>Spot weak messaging, pricing friction, and demand cues before you commit design and engineering time.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="examples">
+        <div class="section-inner">
+          <div class="section-label" data-reveal>Output showcase</div>
+          <h2 class="section-title" data-reveal>The output feels less like a report and more like a room reacting in real time.</h2>
+          <p class="section-copy" data-reveal>
+            Fast enough for ideation, structured enough for decisions. The personas surface objections, pricing intuition, and the language people naturally use.
+          </p>
+
+          <div class="showcase">
+            <div class="insight-card" data-reveal>
+              <div class="console-shell" style="height: 100%;">
+                <div class="console-topbar">
+                  <div class="console-meta">
+                    <div class="console-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <span>Example run</span>
+                  </div>
+                  <div class="console-status">
+                    <span class="status-pulse"></span>
+                    <span>5 personas sampled</span>
+                  </div>
+                </div>
+                <div class="console-body" id="showcaseConsole">
+                  <div class="prompt-line visible"><span class="label">&gt; idea</span> AI assistant that turns product notes into launch briefs</div>
+                  <div class="prompt-line visible"><span class="muted">[01] Operator, 31</span> "I like the speed, but I need proof it captures nuance from scattered docs."</div>
+                  <div class="prompt-line visible"><span class="muted">[02] Solo founder, 27</span> "If it saves me one late-night launch scramble, I would pay for it."</div>
+                  <div class="prompt-line visible"><span class="muted">[03] PMM, 34</span> "The value is clear when the team already has too many inputs and no final story."</div>
+                  <div class="prompt-line visible"><span class="muted">[04] Designer, 25</span> "This wins when the output reads like a human brief, not synthetic filler."</div>
+                  <div class="prompt-line visible"><span class="muted">[05] Agency lead, 38</span> "Price it by launches, not seats. Seats feel like overhead."</div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="signal-card">
+              <div data-reveal>
+                <div class="signal-title">Signal snapshot</div>
+                <div class="metric">
+                  <div class="metric-value">72%</div>
+                  <div class="metric-copy">of sampled personas showed clear interest, but only when the time-saved promise was obvious.</div>
+                </div>
+              </div>
+
+              <div class="mini-bars" data-reveal>
+                <div>
+                  Willingness to pay
+                  <span><i class="mini-fill" data-fill="68"></i></span>
+                </div>
+                <div>
+                  Initial clarity
+                  <span><i class="mini-fill" data-fill="81"></i></span>
+                </div>
+                <div>
+                  Skepticism risk
+                  <span><i class="mini-fill" data-fill="39"></i></span>
+                </div>
+              </div>
+
+              <div class="section-copy" style="margin: 0;" data-reveal>
+                Pricing starts as a placeholder here, but the pattern is intentional: premium product, focused workflow, signal first.
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pricing">
+        <div class="section-inner">
+          <div class="section-label" data-reveal>Pricing</div>
+          <h2 class="section-title" data-reveal>Start free, then unlock sharper signal as the decision gets bigger.</h2>
+          <p class="section-copy" data-reveal>
+            Pricing stays simple so the upgrade path is obvious: test a few ideas for free, go deeper with real-world signal, then unlock perception and spread analysis when messaging matters.
+          </p>
+
+          <div class="pricing-grid">
+            <article class="pricing-card" data-reveal>
+              <div class="pricing-header">
+                <div class="pricing-tier">Free</div>
+                <div class="pricing-subtitle">For quick exploration when you just need a first read on an idea.</div>
+                <div class="pricing-price">
+                  <strong>$0</strong>
+                </div>
+                <a href="/app/signup?plan=Free" class="button secondary pricing-cta">Start Free</a>
+              </div>
+              <div class="pricing-body">
+                <div class="pricing-group">
+                  <ul class="pricing-list">
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>3 idea tests</span></li>
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>Basic personas</span></li>
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>Basic insights</span></li>
+                  </ul>
+                </div>
+                <div class="pricing-group">
+                  <ul class="pricing-list locked">
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Faster processing</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Live Signals</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Perception Test</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Spread Simulation</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Deep insights</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="pricing-footer spacious">
+                <div class="pricing-note">Best for trying the core loop</div>
+              </div>
+            </article>
+
+            <article class="pricing-card" data-reveal>
+              <div class="pricing-header">
+                <div class="pricing-tier">Starter</div>
+                <div class="pricing-subtitle">For solo builders turning initial curiosity into real validation.</div>
+                <div class="pricing-price">
+                  <strong>$12</strong>
+                  <span>/ month</span>
+                </div>
+                <a href="/app/signup?plan=Starter" class="button secondary pricing-cta">Choose Starter</a>
+              </div>
+              <div class="pricing-body">
+                <div class="pricing-intro">Everything in Free, and:</div>
+                <div class="pricing-group">
+                  <ul class="pricing-list">
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>30 idea tests / month</span></li>
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>Enhanced personas</span></li>
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>Structured insights</span></li>
+                    <li><ion-icon name="checkmark-circle"></ion-icon><span>Faster processing</span></li>
+                    <li><ion-icon name="sparkles"></ion-icon><span>Live Signals</span></li>
+                  </ul>
+                </div>
+                <div class="pricing-group">
+                  <ul class="pricing-list locked">
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Deep analysis</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Priority processing</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Perception Test</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Spread Simulation</span></li>
+                    <li><ion-icon name="lock-closed"></ion-icon><span>Improvement suggestions</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="pricing-footer">
+                <div class="pricing-note">Best for ongoing idea validation</div>
+              </div>
+            </article>
+
+            <article class="pricing-card featured" data-reveal>
+              <div class="pricing-header">
+                <div class="pricing-tier">Pro</div>
+                <div class="pricing-subtitle">For teams refining positioning and growth before launch.</div>
+                <div class="pricing-price">
+                  <strong>$39</strong>
+                  <span>/ month</span>
+                </div>
+                <a href="/app/signup?plan=Pro" class="button primary pricing-cta">Go Pro</a>
+              </div>
+              <div class="pricing-body">
+                <div class="pricing-intro">Everything in Starter, and:</div>
+                <ul class="pricing-list">
+                  <li><ion-icon name="checkmark-circle"></ion-icon><span>120 idea tests / month</span></li>
+                  <li><ion-icon name="checkmark-circle"></ion-icon><span>Deep analysis</span></li>
+                  <li><ion-icon name="checkmark-circle"></ion-icon><span>Priority processing</span></li>
+                  <li><ion-icon name="sparkles"></ion-icon><span>Perception Test</span></li>
+                  <li><ion-icon name="sparkles"></ion-icon><span>Spread Simulation</span></li>
+                  <li><ion-icon name="sparkles"></ion-icon><span>Improvement suggestions</span></li>
+                </ul>
+              </div>
+              <div class="pricing-footer">
+                <div class="pricing-note">Most valuable for launch decisions</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="final-cta" id="final-cta">
+        <div class="final-cta-inner" data-reveal>
+          <div class="final-cta-content">
+            <div class="section-label">Start now</div>
+            <h2>Get signal while the idea is still cheap to change.</h2>
+            <p>
+              Paste the concept, pressure-test the pitch, and decide what deserves a roadmap. Prelaunch keeps the first answer fast and the next move clearer.
+            </p>
+            <div class="input-shell">
+              <input
+                class="idea-input"
+                id="finalIdeaInput"
+                type="text"
+                value="A founder CRM that summarizes investor conversations and next steps."
+                aria-label="Describe your idea again"
+                placeholder="Describe your next product idea"
+              >
+              <button id="finalTestButton" class="button primary" type="button">Test Idea</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Prelaunch</span>
+      <div class="footer-links">
+        <span>See what lands before you ship.</span>
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/refunds.html">Refunds</a>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { animate, inView } from "https://cdn.jsdelivr.net/npm/motion@latest/+esm";
+
+    const nav = document.getElementById("nav");
+    const heroConsole = document.getElementById("heroConsole");
+    const status = document.getElementById("consoleStatus");
+    const ideaInput = document.getElementById("ideaInput");
+    const finalIdeaInput = document.getElementById("finalIdeaInput");
+    const testIdeaButton = document.getElementById("testIdeaButton");
+    const finalTestButton = document.getElementById("finalTestButton");
+    const watchDemoButton = document.getElementById("watchDemoButton");
+    const heroItems = [...document.querySelectorAll("[data-hero]")];
+    const fills = [...document.querySelectorAll("[data-fill]")];
+    const liveQuotes = [...document.querySelectorAll("[data-quote]")];
+    const personaRows = [...document.querySelectorAll("[data-persona]")];
+    const perceptionRows = [...document.querySelectorAll("[data-perception]")];
+    const spreadRows = [...document.querySelectorAll("[data-spread]")];
+    const pricingCards = [...document.querySelectorAll(".pricing-grid .pricing-card")];
+    let activeRun = 0;
+
+    const scenarioLibrary = [
+      {
+        match: ["calendar", "trip", "travel", "weekend", "itinerary"],
+        lines: [
+          { role: "Student, 20", text: "I already bounce between Google Calendar and TikTok. This needs to feel instant, not like planning homework." },
+          { role: "Consultant, 32", text: "If it turns an open weekend into a bookable plan in two minutes, I would try it." },
+          { role: "Product designer, 26", text: "The killer feature is confidence. Show me why these plans fit my budget and energy level." },
+          { role: "Founder, 29", text: "I would pay if it actually removes tabs, bookings, and indecision from the flow." }
+        ]
+      },
+      {
+        match: ["launch", "brief", "marketing", "campaign", "copy"],
+        lines: [
+          { role: "PMM, 34", text: "This is strongest when it turns scattered notes into a crisp narrative my team can align on." },
+          { role: "Solo founder, 27", text: "I do not need more text. I need the launch angle and the sharpest objections surfaced fast." },
+          { role: "Agency lead, 38", text: "I would pay for confidence in the first draft if the voice still feels human." },
+          { role: "Operator, 31", text: "If the output is editable and grounded in the source material, this saves real time." }
+        ]
+      },
+      {
+        match: ["crm", "investor", "sales", "pipeline", "founder"],
+        lines: [
+          { role: "Seed founder, 30", text: "I need the follow-up written for me, not just a transcript summary." },
+          { role: "Angel investor, 41", text: "The value is in capturing next steps and tone while the call is still fresh." },
+          { role: "Chief of staff, 33", text: "This gets sticky if it makes the messy relationship layer feel organized." },
+          { role: "Revenue lead, 36", text: "I would pay for this sooner than another CRM dashboard if it saves context switching." }
+        ]
+      }
+    ];
+
+    const defaultLines = [
+      { role: "Student, 20", text: "I need to understand the benefit in one sentence or I will move on." },
+      { role: "Founder, 28", text: "If it saves me time or gives me leverage, I would pay for it." },
+      { role: "Designer, 24", text: "The concept is interesting, but the experience has to feel sharper than the alternatives." },
+      { role: "Operator, 35", text: "Show me where this fits into my workflow and the value becomes easier to trust." }
+    ];
+
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function getScenarioLines(idea) {
+      const normalized = idea.toLowerCase();
+      const match = scenarioLibrary.find((scenario) =>
+        scenario.match.some((keyword) => normalized.includes(keyword))
+      );
+      return match ? match.lines : defaultLines;
+    }
+
+    function createLine(text, className = "stream-line") {
+      const line = document.createElement("div");
+      line.className = className;
+      line.textContent = text;
+      return line;
+    }
+
+    async function streamConsole(targetIdea) {
+      const runId = ++activeRun;
+      const idea = targetIdea.trim() || "An AI assistant that validates product ideas before launch.";
+      const lines = getScenarioLines(idea);
+
+      heroConsole.innerHTML = "";
+      status.textContent = "Simulating users...";
+
+      const prompt = createLine("> idea " + idea, "prompt-line");
+      heroConsole.appendChild(prompt);
+      requestAnimationFrame(() => prompt.classList.add("visible"));
+
+      await delay(400);
+      if (runId !== activeRun) return;
+
+      for (const [index, entry] of lines.entries()) {
+        if (runId !== activeRun) return;
+        const line = document.createElement("div");
+        line.className = "stream-line";
+        line.innerHTML = `<span class="muted">[0${index + 1}] ${entry.role}</span> "${entry.text}"`;
+        heroConsole.appendChild(line);
+        requestAnimationFrame(() => line.classList.add("visible"));
+        heroConsole.scrollTop = heroConsole.scrollHeight;
+        await delay(600);
+      }
+
+      if (runId !== activeRun) return;
+      const closing = document.createElement("div");
+      closing.className = "stream-line";
+      closing.innerHTML = `<span class="label">signal</span> Strongest hook: time saved. Primary objection: why this over existing habits?<span class="cursor"></span>`;
+      heroConsole.appendChild(closing);
+      requestAnimationFrame(() => closing.classList.add("visible"));
+      status.textContent = "Audience simulation complete";
+    }
+
+    function syncInputs(source, target) {
+      target.value = source.value;
+    }
+
+    function runSimulationFrom(input) {
+      const value = input.value;
+      ideaInput.value = value;
+      finalIdeaInput.value = value;
+      streamConsole(value);
+    }
+
+    heroItems.forEach((item, index) => {
+      item.style.opacity = "0";
+      item.style.transform = "translateY(24px)";
+      animate(
+        item,
+        { opacity: [0, 1], y: [24, 0] },
+        { delay: 0.14 + index * 0.09, duration: 0.8, easing: [0.22, 1, 0.36, 1] }
+      );
+    });
+
+    animate(".orb.one", { x: [-18, 22, -18], y: [-12, 26, -12] }, { duration: 24, repeat: Infinity, easing: "ease-in-out" });
+    animate(".orb.two", { x: [14, -22, 14], y: [18, -14, 18] }, { duration: 28, repeat: Infinity, easing: "ease-in-out" });
+    animate(".orb.three", { y: [0, -18, 0], scale: [1, 1.08, 1] }, { duration: 32, repeat: Infinity, easing: "ease-in-out" });
+
+    inView("[data-reveal]", (element) => {
+      animate(
+        element,
+        { opacity: [0, 1], y: [22, 0] },
+        { duration: 0.75, easing: [0.22, 1, 0.36, 1] }
+      );
+    }, { margin: "-10% 0px -10% 0px" });
+
+    inView(".mini-bars", () => {
+      fills.forEach((fill, index) => {
+        animate(
+          fill,
+          { width: ["0%", `${fill.dataset.fill}%`] },
+          {
+            delay: 0.08 * index,
+            duration: 1.1,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-15% 0px -15% 0px" });
+
+    inView(".research-card", () => {
+      liveQuotes.forEach((quote, index) => {
+        animate(
+          quote,
+          { opacity: [0, 1], y: [14, 0] },
+          {
+            delay: 0.14 + index * 0.14,
+            duration: 0.7,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-18% 0px -18% 0px" });
+
+    inView(".persona-card", () => {
+      personaRows.forEach((row, index) => {
+        animate(
+          row,
+          { opacity: [0, 1], y: [14, 0] },
+          {
+            delay: 0.12 + index * 0.12,
+            duration: 0.68,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-18% 0px -18% 0px" });
+
+    inView(".perception-card", () => {
+      perceptionRows.forEach((row, index) => {
+        animate(
+          row,
+          { opacity: [0, 1], y: [14, 0] },
+          {
+            delay: 0.12 + index * 0.11,
+            duration: 0.68,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-18% 0px -18% 0px" });
+
+    inView(".spread-card", () => {
+      spreadRows.forEach((row, index) => {
+        animate(
+          row,
+          { opacity: [0, 1], y: [14, 0] },
+          {
+            delay: 0.12 + index * 0.1,
+            duration: 0.68,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-18% 0px -18% 0px" });
+
+    inView(".pricing-grid", () => {
+      pricingCards.forEach((card, index) => {
+        animate(
+          card,
+          { opacity: [0, 1], y: [24, 0] },
+          {
+            delay: 0.08 + index * 0.08,
+            duration: 0.72,
+            easing: [0.22, 1, 0.36, 1]
+          }
+        );
+      });
+    }, { margin: "-14% 0px -14% 0px" });
+
+    document.addEventListener("scroll", () => {
+      nav.classList.toggle("scrolled", window.scrollY > 12);
+    }, { passive: true });
+
+    ideaInput.addEventListener("input", () => syncInputs(ideaInput, finalIdeaInput));
+    finalIdeaInput.addEventListener("input", () => syncInputs(finalIdeaInput, ideaInput));
+
+    testIdeaButton.addEventListener("click", () => runSimulationFrom(ideaInput));
+    finalTestButton.addEventListener("click", () => {
+      runSimulationFrom(finalIdeaInput);
+      document.getElementById("top").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    watchDemoButton.addEventListener("click", () => {
+      document.getElementById("examples").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    nav.classList.toggle("scrolled", window.scrollY > 12);
+    streamConsole(ideaInput.value);
+  </script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
