@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prelaunch Investor Deck</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --slide-width: 1600px;
+      --slide-height: 900px;
+      --slide-scale: 1;
+      --bg-soft: rgba(255, 255, 255, 0.03);
+      --surface: rgba(10, 10, 14, 0.88);
+      --surface-strong: rgba(14, 14, 20, 0.96);
+      --border: #1a1a1a;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.6);
+      --soft: rgba(255, 255, 255, 0.38);
+      --blue: #76a7ff;
+      --purple: #9c7cff;
+      --shadow: 0 35px 120px rgba(0, 0, 0, 0.45);
+      --glow: 0 0 50px rgba(118, 167, 255, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(118, 167, 255, 0.18), transparent 22%),
+        radial-gradient(circle at 82% 14%, rgba(156, 124, 255, 0.16), transparent 24%),
+        radial-gradient(circle at 50% 78%, rgba(90, 130, 255, 0.09), transparent 26%),
+        linear-gradient(180deg, #070707 0%, #050505 42%, #030303 100%);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, transparent 48%, rgba(0, 0, 0, 0.35) 100%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.015) 0,
+          rgba(255, 255, 255, 0.015) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      mix-blend-mode: screen;
+      opacity: 0.32;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .toolbar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toolbar a,
+    .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 10, 14, 0.72);
+      backdrop-filter: blur(16px);
+      color: var(--text);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      transition: transform 180ms ease, border-color 180ms ease, filter 180ms ease;
+      cursor: pointer;
+    }
+
+    .toolbar a:hover,
+    .toolbar button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(118, 167, 255, 0.32);
+      filter: brightness(1.06);
+    }
+
+    .toolbar .primary {
+      background: linear-gradient(135deg, rgba(118, 167, 255, 0.18), rgba(156, 124, 255, 0.2));
+      border-color: rgba(118, 167, 255, 0.26);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 18px 55px rgba(118, 167, 255, 0.12);
+    }
+
+    .slides {
+      position: relative;
+    }
+
+    .slide {
+      min-height: 100vh;
+      height: 100vh;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
+        rgba(8, 8, 10, 0.52);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow);
+      z-index: -2;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(118, 167, 255, 0.08), transparent 20%),
+        radial-gradient(circle at 88% 14%, rgba(156, 124, 255, 0.08), transparent 18%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .slide-inner {
+      position: relative;
+      width: var(--slide-width);
+      height: var(--slide-height);
+      transform: scale(var(--slide-scale));
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 20px;
+      padding: 52px 56px 44px;
+    }
+
+    .slide-head {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.74rem;
+    }
+
+    .slide-number {
+      position: absolute;
+      top: 28px;
+      right: 24px;
+      color: rgba(255, 255, 255, 0.34);
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      max-width: 980px;
+      font-weight: 750;
+      text-wrap: balance;
+    }
+
+    h1 {
+      font-size: 120px;
+      line-height: 0.92;
+    }
+
+    h2 {
+      font-size: 72px;
+      line-height: 0.96;
+    }
+
+    .accent {
+      background: linear-gradient(120deg, #dce9ff 4%, #7cabff 48%, #c8b8ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 28px rgba(118, 167, 255, 0.12);
+    }
+
+    .subtext {
+      margin: 18px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.6;
+      letter-spacing: -0.02em;
+    }
+
+    .content-grid {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      min-width: 0;
+      overflow: visible;
+      min-height: 0;
+    }
+
+    .two-col {
+      flex-direction: row;
+    }
+
+    .copy-visual-layout {
+      flex-direction: row;
+    }
+
+    .copy-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 14px;
+      min-width: 0;
+      flex: 0 0 auto;
+      width: 50%;
+      max-width: 50%;
+    }
+
+    .visual-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-content: start;
+      min-width: 0;
+      flex: 0 0 auto;
+      width: 50%;
+      max-width: 50%;
+      min-height: 0;
+    }
+
+    .content-grid > * {
+      min-width: 0;
+    }
+
+    .two-col > :first-child {
+      flex: 0 0 auto;
+      width: 50%;
+      max-width: 50%;
+    }
+
+    .two-col > :last-child {
+      flex: 0 0 auto;
+      width: 50%;
+      max-width: 50%;
+    }
+
+    .stats-grid,
+    .card-grid,
+    .pricing-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card-grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stacked-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .pricing-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pricing-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        var(--glow),
+        0 24px 75px rgba(0, 0, 0, 0.32);
+    }
+
+    .pricing-card.featured {
+      background:
+        radial-gradient(circle at top, rgba(118, 167, 255, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border-color: rgba(118, 167, 255, 0.2);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 30px 90px rgba(0, 0, 0, 0.46),
+        0 0 40px rgba(118, 167, 255, 0.08);
+    }
+
+    .pricing-header {
+      display: grid;
+      gap: 12px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pricing-tier {
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 1.08rem;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+    }
+
+    .pricing-subtitle {
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 30ch;
+      font-size: 0.96rem;
+    }
+
+    .pricing-price {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      letter-spacing: -0.06em;
+    }
+
+    .pricing-price strong {
+      font-size: clamp(2.7rem, 5vw, 4rem);
+      line-height: 0.95;
+    }
+
+    .pricing-price span {
+      color: rgba(255, 255, 255, 0.56);
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .pricing-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.76);
+      line-height: 1.6;
+      font-size: 0.96rem;
+    }
+
+    .pricing-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .pricing-list li::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      margin-top: 0.55em;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(118, 167, 255, 0.95), rgba(156, 124, 255, 0.9));
+      box-shadow: 0 0 16px rgba(118, 167, 255, 0.26);
+    }
+
+    .pricing-note {
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .card,
+    .stat-card,
+    .terminal,
+    .quote-panel,
+    .research-card,
+    .pricing-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+        var(--surface);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        var(--glow),
+        0 24px 75px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(18px);
+    }
+
+    .card::before,
+    .stat-card::before,
+    .terminal::before,
+    .quote-panel::before,
+    .research-card::before,
+    .pricing-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(118, 167, 255, 0.08), transparent 26%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 44%);
+      pointer-events: none;
+    }
+
+    .card,
+    .quote-panel {
+      padding: 24px;
+    }
+
+    .compact-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 220px;
+      gap: 18px;
+    }
+
+    .compact-title {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+    }
+
+    .research-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
+        rgba(8, 8, 11, 0.92);
+    }
+
+    .research-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .research-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.84rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .research-title strong {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .research-body {
+      position: relative;
+      z-index: 1;
+      padding: 14px 16px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .source-quote,
+    .persona-row,
+    .terminal-block {
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .source-quote:last-child,
+    .persona-row:last-child,
+    .terminal-block:last-child {
+      border-bottom: 0;
+      padding-bottom: 4px;
+    }
+
+    .source-label,
+    .persona-key,
+    .terminal-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 5px;
+      color: rgba(160, 190, 255, 0.9);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .source-label::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(138, 178, 255, 0.9);
+      box-shadow: 0 0 16px rgba(138, 178, 255, 0.36);
+    }
+
+    .source-quote p,
+    .persona-value,
+    .terminal-text {
+      margin: 0;
+      color: rgba(240, 244, 255, 0.9);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .research-footer,
+    .persona-note,
+    .terminal-arrow {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .persona-stack,
+    .terminal-stack {
+      display: grid;
+      gap: 0;
+    }
+
+    .persona-row {
+      display: grid;
+      grid-template-columns: minmax(118px, 140px) 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .terminal-arrow {
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .feature-card.perception-card::before {
+      background:
+        radial-gradient(circle at top right, rgba(118, 167, 255, 0.1), transparent 28%),
+        linear-gradient(155deg, rgba(255, 255, 255, 0.025), transparent 38%);
+    }
+
+    .feature-card.spread-card::before {
+      background:
+        radial-gradient(circle at top left, rgba(156, 124, 255, 0.1), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+    }
+
+    .persona-card::before {
+      background:
+        radial-gradient(circle at top left, rgba(156, 124, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 36%);
+    }
+
+    .stat-card {
+      padding: 22px;
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat-label,
+    .card-label {
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+    }
+
+    .stat-value {
+      font-size: 48px;
+      line-height: 1;
+      letter-spacing: -0.08em;
+    }
+
+    .stat-copy,
+    .card-copy,
+    .quote-copy {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 1.05rem;
+    }
+
+    .bullet-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 10px;
+      max-width: 620px;
+    }
+
+    .bullet-list li {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      align-items: start;
+      column-gap: 14px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 28px;
+      line-height: 1.38;
+      letter-spacing: -0.03em;
+    }
+
+    .bullet-list li::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      margin-top: 0.42em;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(118, 167, 255, 0.95), rgba(156, 124, 255, 0.95));
+      box-shadow: 0 0 20px rgba(118, 167, 255, 0.3);
+    }
+
+    .terminal {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
+        rgba(7, 7, 10, 0.95);
+    }
+
+    .terminal-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .dots {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .terminal-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: rgba(255, 255, 255, 0.48);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .terminal-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(188, 220, 255, 0.84);
+      font-size: 0.82rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8ab2ff;
+      box-shadow: 0 0 18px rgba(138, 178, 255, 0.7);
+    }
+
+    .terminal-body {
+      padding: 24px 22px 26px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 18px;
+      line-height: 1.75;
+      color: rgba(243, 246, 255, 0.92);
+      display: grid;
+      gap: 10px;
+    }
+
+    .line {
+      white-space: pre-wrap;
+      opacity: 1;
+      transform: none;
+    }
+
+    .line.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .line .label {
+      color: rgba(134, 168, 255, 0.96);
+    }
+
+    .line .muted {
+      color: rgba(255, 255, 255, 0.42);
+    }
+
+    .quote-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 100%;
+    }
+
+    .quote-copy {
+      font-size: 22px;
+    }
+
+    .micro-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .micro-card {
+      border-radius: 0;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 16px 18px;
+    }
+
+    .micro-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+
+    .micro-card span {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .slide-ask {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.96rem;
+      letter-spacing: -0.02em;
+    }
+
+    .footnote {
+      display: none;
+    }
+
+    .closing {
+      font-size: 56px;
+      letter-spacing: -0.08em;
+      line-height: 0.95;
+      max-width: 720px;
+    }
+
+    .hero-spread {
+      display: grid;
+      gap: 18px;
+      align-items: end;
+    }
+
+    .hero-spread .subtext {
+      margin-top: 0;
+    }
+
+    .metric-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .metric-row span:last-child {
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.82rem;
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 980px) {
+      .slide {
+        min-height: 100vh;
+        padding: 16px;
+      }
+
+      .slide::before {
+        inset: 0;
+      }
+
+      .slide-inner {
+        padding: 52px 56px 44px;
+      }
+
+      .slide-number {
+        top: 52px;
+        right: 56px;
+      }
+
+      .content-grid,
+      .two-col,
+      .copy-visual-layout {
+        flex-direction: column;
+      }
+
+      .copy-column,
+      .visual-stack,
+      .two-col > :first-child,
+      .two-col > :last-child {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .stats-grid,
+      .card-grid.two,
+      .pricing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar {
+        top: 14px;
+        right: 14px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
+      html,
+      body {
+        background: var(--bg) !important;
+        width: 100%;
+        height: auto;
+      }
+
+      body {
+        overflow: visible;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .page,
+      .slides {
+        display: block;
+      }
+
+      body::before,
+      .toolbar {
+        display: none !important;
+      }
+
+      .slide {
+        width: auto;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+        display: block;
+        overflow: visible;
+        page-break-after: always;
+        break-after: page;
+        break-inside: avoid;
+      }
+
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .slide::before {
+        inset: 0;
+        border-radius: 0;
+        border: 0;
+        background:
+          radial-gradient(circle at 18% 12%, rgba(118, 167, 255, 0.14), transparent 22%),
+          radial-gradient(circle at 82% 14%, rgba(156, 124, 255, 0.13), transparent 24%),
+          linear-gradient(180deg, #070707 0%, #050505 42%, #030303 100%);
+        box-shadow: none;
+      }
+
+      .slide::after {
+        inset: 0;
+      }
+
+      .slide-inner {
+        width: 13.333in;
+        height: 7.5in;
+        min-height: 7.5in;
+        padding: 0.42in 0.46in 0.36in;
+        display: flex;
+        flex-direction: column;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="slides">
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Prelaunch investor deck</p>
+              <h1>Prelaunch</h1>
+              <p class="subtext">"See what people think before you build"</p>
+            </div>
+            <div class="slide-number">01 / Cover</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="hero-spread">
+              <h2>AI-powered idea validation, market signals, and <span class="accent">messaging simulation</span></h2>
+              <p class="subtext">A fast decision layer for founders before code, spend, or go-to-market commitments.</p>
+            </div>
+
+            <div class="terminal">
+              <div class="terminal-topbar">
+                <div class="terminal-meta">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <span>Prelaunch preview</span>
+                </div>
+                <div class="terminal-status">
+                  <span class="status-dot"></span>
+                  <span>Signal before build</span>
+                </div>
+              </div>
+              <div class="terminal-body">
+                <div class="line visible"><span class="label">&gt; audience</span> indie hackers, marketers</div>
+                <div class="line visible"><span class="label">&gt; category</span> pre-product validation</div>
+                <div class="line visible"><span class="label">&gt; wedge</span> find bad ideas before code</div>
+                <div class="line visible"><span class="label">&gt; outcome</span> better bets, sharper launches</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Problem</p>
+              <h2>Building without validation is expensive</h2>
+            </div>
+            <div class="slide-number">02 / Problem</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Founders rely on guesswork</li>
+                <li>Surveys are slow and biased</li>
+                <li>Market research is expensive</li>
+                <li>Most products fail post-launch</li>
+              </ul>
+            </div>
+
+            <div class="card-grid stacked-cards">
+              <article class="card compact-card">
+                <div class="card-label">Reality today</div>
+                <h3 class="compact-title">Teams commit months before hearing the real market answer.</h3>
+                <p class="card-copy">Validation usually arrives after time, money, and roadmap confidence are already committed.</p>
+              </article>
+              <article class="card compact-card">
+                <div class="card-label">Cost</div>
+                <h3 class="compact-title">The wrong product can look right for far too long.</h3>
+                <p class="card-copy">The real loss is not just build cost, but momentum wasted on a weak bet.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Solution</p>
+              <h2>Test ideas before they exist</h2>
+            </div>
+            <div class="slide-number">03 / Solution</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Simulate user reactions instantly</li>
+                <li>Analyze real-world discussions</li>
+                <li>Predict messaging performance</li>
+                <li>Generate actionable insights in seconds</li>
+              </ul>
+            </div>
+
+            <aside class="research-card">
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Live signals</strong>
+                </div>
+                <div class="terminal-status">
+                  <span class="status-dot"></span>
+                  <span>Market context</span>
+                </div>
+              </div>
+              <div class="research-body">
+                <article class="source-quote">
+                  <div class="source-label">Forums</div>
+                  <p>Builders want feedback before they sink nights and weekends into a product no one needs.</p>
+                </article>
+                <article class="source-quote">
+                  <div class="source-label">Creators</div>
+                  <p>Marketers care less about novelty and more about whether the hook converts and travels.</p>
+                </article>
+                <article class="source-quote">
+                  <div class="source-label">Outcome</div>
+                  <p>Prelaunch compresses that early research into one fast, repeatable decision loop.</p>
+                </article>
+                <div class="research-footer">Cross-source synthesis ready</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Product</p>
+              <h2>A live decision engine for early-stage ideas</h2>
+            </div>
+            <div class="slide-number">04 / Demo</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="terminal">
+              <div class="terminal-topbar">
+                <div class="terminal-meta">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <span>Prelaunch run</span>
+                </div>
+                <div class="terminal-status">
+                  <span class="status-dot"></span>
+                  <span>Simulation live</span>
+                </div>
+              </div>
+              <div class="terminal-body" id="demoTerminal">
+                <div class="line"><span class="label">&gt; input</span> AI that plans your day</div>
+                <div class="line"><span class="muted">[Persona reactions]</span></div>
+                <div class="line">Student, 20  -> "Useful, but feels generic unless it saves time immediately."</div>
+                <div class="line">Founder, 31  -> "Interesting if it turns chaos into a concrete daily plan."</div>
+                <div class="line"><span class="muted">[Objections]</span></div>
+                <div class="line">- Sounds like another productivity app</div>
+                <div class="line">- Unclear what data it uses and how it decides</div>
+                <div class="line"><span class="muted">[Willingness to pay]</span></div>
+                <div class="line">- Casual users: low</div>
+                <div class="line">- Busy professionals: moderate if outcomes are measurable</div>
+              </div>
+            </div>
+
+            <div class="quote-panel">
+              <div>
+                <div class="card-label">Concept output</div>
+                <p class="quote-copy">The interface shows the intended core loop: input an idea, ad, or landing page and get simulated reactions across a varied demographic before building.</p>
+              </div>
+              <div class="metric-stack">
+                <div class="metric-row">
+                  <span>Business idea</span>
+                  <span>Find bad ideas early</span>
+                </div>
+                <div class="metric-row">
+                  <span>Ad copy</span>
+                  <span>Improve PMF narrative</span>
+                </div>
+                <div class="metric-row">
+                  <span>Landing page</span>
+                  <span>Optimize conversions</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Core features</p>
+              <h2>Decision engine before launch</h2>
+            </div>
+            <div class="slide-number">05 / Features</div>
+          </div>
+
+          <div class="content-grid copy-visual-layout">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Idea validation through simulated users</li>
+                <li>Live signals from real-world discussion patterns</li>
+                <li>Perception testing for hooks, ads, and landing pages</li>
+                <li>Spread simulation for word-of-mouth and clarity</li>
+              </ul>
+
+              <div class="slide-ask" style="margin-top: 22px;">
+                <span class="pill">Built for idea-stage decisions</span>
+                <span class="pill">One workflow, four high-signal lenses</span>
+              </div>
+            </div>
+
+            <div class="visual-stack">
+              <article class="research-card persona-card">
+                <div class="research-header">
+                  <div class="research-title">
+                    <div class="dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <strong>Idea validation</strong>
+                  </div>
+                </div>
+                <div class="research-body">
+                  <div class="persona-stack">
+                    <article class="persona-row">
+                      <div class="persona-key">Audience</div>
+                      <div class="persona-value">Early adopters segmented by age, urgency, budget, and skepticism.</div>
+                    </article>
+                    <article class="persona-row">
+                      <div class="persona-key">Signal</div>
+                      <div class="persona-value">Who leans in, who hesitates, and where pricing feels credible.</div>
+                    </article>
+                  </div>
+                  <div class="persona-note">Synthetic personas calibrated for early reactions</div>
+                </div>
+              </article>
+              <article class="research-card feature-card spread-card">
+                <div class="research-header">
+                  <div class="research-title">
+                    <div class="dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <strong>Spread simulation</strong>
+                  </div>
+                </div>
+                <div class="research-body">
+                  <div class="terminal-stack">
+                    <article class="terminal-block">
+                      <div class="terminal-kicker">Ad hook</div>
+                      <div class="terminal-text">"AI that plans your day automatically"</div>
+                    </article>
+                    <article class="terminal-block">
+                      <div class="terminal-kicker">Perception</div>
+                      <div class="terminal-text">Useful, but still too generic without a clearer outcome.</div>
+                    </article>
+                    <article class="terminal-block">
+                      <div class="terminal-kicker">Spread outcome</div>
+                      <div class="terminal-text">Message degrades into "another productivity app"</div>
+                      <div class="terminal-arrow">Suggested fix: sharpen the hook</div>
+                    </article>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Market opportunity</p>
+              <h2>Every builder needs validation</h2>
+            </div>
+            <div class="slide-number">06 / Market</div>
+          </div>
+
+          <div class="content-grid copy-visual-layout">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Indie hackers and marketers are shipping faster with AI</li>
+                <li>Marketing is already one of the heaviest gen AI use cases</li>
+                <li>Small businesses are steadily closing the AI adoption gap</li>
+                <li>Large global opportunity across pre-build and pre-launch workflows</li>
+              </ul>
+            </div>
+
+            <aside class="research-card">
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Market read</strong>
+                </div>
+                <div class="terminal-status">
+                  <span class="status-dot"></span>
+                  <span>Tailwinds active</span>
+                </div>
+              </div>
+              <div class="research-body">
+                <article class="source-quote">
+                  <div class="source-label">Primary wedge</div>
+                  <p>Indie hackers and lean marketing teams both need signal before spending time or budget.</p>
+                </article>
+                <article class="source-quote">
+                  <div class="source-label">Tailwind</div>
+                  <p>McKinsey 2025: gen AI is regularly used in at least one business function at 71% of organizations.</p>
+                </article>
+                <article class="source-quote">
+                  <div class="source-label">Adoption gap</div>
+                  <p>SBA 2025: small-business AI use rose from 6.3% to 8.8% in six months.</p>
+                </article>
+                <div class="research-footer">Validation becomes more valuable as build cost falls</div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="footnote">Market basis: McKinsey State of AI 2025, U.S. SBA Office of Advocacy AI in Business spotlight (September 24, 2025), Constant Contact Small Business Now (February 11, 2026).</div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Business model</p>
+              <h2>Simple SaaS pricing</h2>
+            </div>
+            <div class="slide-number">07 / Model</div>
+          </div>
+
+          <div class="content-grid copy-visual-layout">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Subscription model</li>
+                <li>Credit-based usage</li>
+                <li>Starter: $12/month</li>
+                <li>Pro: $39/month</li>
+              </ul>
+            </div>
+
+            <div class="pricing-grid">
+              <article class="pricing-card">
+                <div class="pricing-header">
+                  <div class="pricing-tier">Starter</div>
+                  <div class="pricing-subtitle">For solo builders validating ideas consistently.</div>
+                  <div class="pricing-price">
+                    <strong>$12</strong>
+                    <span>/ month</span>
+                  </div>
+                </div>
+                <ul class="pricing-list">
+                  <li>Subscription model</li>
+                  <li>Credit-based usage</li>
+                  <li>Idea tests and messaging checks</li>
+                </ul>
+                <div class="pricing-note">Built for recurring lightweight validation</div>
+              </article>
+              <article class="pricing-card featured">
+                <div class="pricing-header">
+                  <div class="pricing-tier">Pro</div>
+                  <div class="pricing-subtitle">For deeper testing, sharper messaging, and higher-volume usage.</div>
+                  <div class="pricing-price">
+                    <strong>$39</strong>
+                    <span>/ month</span>
+                  </div>
+                </div>
+                <ul class="pricing-list">
+                  <li>Deeper simulations and broader testing</li>
+                  <li>Perception and spread analysis</li>
+                  <li>Designed for higher-intent launch decisions</li>
+                </ul>
+                <div class="pricing-note">Premium tier for teams refining go-to-market</div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Traction</p>
+              <h2>Early traction</h2>
+            </div>
+            <div class="slide-number">08 / Traction</div>
+          </div>
+
+          <div class="content-grid copy-visual-layout">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Landing page live</li>
+                <li>Product scope and pricing defined</li>
+                <li>Early positioning and demand testing underway</li>
+                <li>Pre-launch interest from target users</li>
+              </ul>
+            </div>
+
+            <aside class="research-card persona-card">
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Early validation map</strong>
+                </div>
+              </div>
+              <div class="research-body">
+                <div class="persona-stack">
+                  <article class="persona-row">
+                    <div class="persona-key">Stage</div>
+                    <div class="persona-value">Landing-page-first. Honest pre-launch positioning without pretending the product is already live.</div>
+                  </article>
+                  <article class="persona-row">
+                    <div class="persona-key">Hypothesis</div>
+                    <div class="persona-value">The buyer, pricing, and workflow are specific enough to test quickly with real users.</div>
+                  </article>
+                  <article class="persona-row">
+                    <div class="persona-key">Next step</div>
+                    <div class="persona-value">Turn early interest into tighter product scope, stronger messaging, and build confidence.</div>
+                  </article>
+                </div>
+                <div class="persona-note">Pre-launch by design, not by accident</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Why now</p>
+              <h2>AI is changing how decisions are made</h2>
+            </div>
+            <div class="slide-number">09 / Timing</div>
+          </div>
+
+          <div class="content-grid copy-visual-layout">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>AI adoption accelerating</li>
+                <li>Builders shipping faster than ever</li>
+                <li>Need for validation increasing</li>
+                <li>Decision-making is shifting toward AI-assisted workflows</li>
+              </ul>
+            </div>
+
+            <aside class="research-card feature-card spread-card">
+              <div class="research-header">
+                <div class="research-title">
+                  <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <strong>Decision shift</strong>
+                </div>
+              </div>
+              <div class="research-body">
+                <div class="terminal-stack">
+                  <article class="terminal-block">
+                    <div class="terminal-kicker">Then</div>
+                    <div class="terminal-text">Shipping was expensive, so building was the main bottleneck.</div>
+                  </article>
+                  <article class="terminal-block">
+                    <div class="terminal-kicker">Now</div>
+                    <div class="terminal-text">AI lowers production cost and increases launch volume.</div>
+                  </article>
+                  <article class="terminal-block">
+                    <div class="terminal-kicker">Result</div>
+                    <div class="terminal-text">Validation becomes the new scarce advantage.</div>
+                    <div class="terminal-arrow">Prelaunch sits in that gap</div>
+                  </article>
+                </div>
+              </div>
+            </aside>
+
+            <div class="footnote">Timing signal: McKinsey 2025 shows marketing and sales among the most common gen AI deployment areas; Constant Contact's February 11, 2026 report says 54% of SMB owners already use AI marketing tools.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Team</p>
+              <h2>Builder-led</h2>
+            </div>
+            <div class="slide-number">10 / Team</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Solo founder</li>
+                <li>Strong technical and product focus</li>
+                <li>Background in building and shipping products</li>
+              </ul>
+            </div>
+
+            <div class="quote-panel">
+              <div class="card-label">Operating advantage</div>
+              <p class="quote-copy">The team is close to the user, close to the product, and able to ship quickly. That speed matters when the market itself is moving this fast.</p>
+              <div class="pill">Technical depth + product instinct</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Vision</p>
+              <h2>From validation to decision layer</h2>
+            </div>
+            <div class="slide-number">11 / Vision</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Become default tool before building anything</li>
+                <li>Reduce failed products globally</li>
+                <li>Expand into full decision intelligence platform</li>
+              </ul>
+            </div>
+
+            <div class="quote-panel">
+              <div class="card-label">Long-term</div>
+              <p class="quote-copy">Start with idea validation. Grow into the default interface for product, market, and messaging decisions before teams invest serious time or capital.</p>
+              <h3 class="closing">From “should we build this?” to <span class="accent">“what should we do next?”</span></h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="slide-inner">
+          <div class="slide-head">
+            <div>
+              <p class="eyebrow">Ask</p>
+              <h2>What we’re raising for</h2>
+            </div>
+            <div class="slide-number">12 / Ask</div>
+          </div>
+
+          <div class="content-grid two">
+            <div class="copy-column">
+              <ul class="bullet-list">
+                <li>Product development</li>
+                <li>Model improvement</li>
+                <li>Growth and distribution</li>
+                <li>Early team expansion</li>
+              </ul>
+            </div>
+
+            <div class="quote-panel">
+              <div>
+                <div class="card-label">Close</div>
+                <h3 class="closing">Stop guessing. <span class="accent">Start validating.</span></h3>
+              </div>
+              <div class="slide-ask">
+                <span class="pill">Prelaunch</span>
+                <span class="pill">Investor deck</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const printButton = document.getElementById("printDeck");
+    const updateDeckScale = () => {
+      const horizontalPadding = 48;
+      const verticalPadding = 48;
+      const availableWidth = Math.max(window.innerWidth - horizontalPadding, 320);
+      const availableHeight = Math.max(window.innerHeight - verticalPadding, 320);
+      const scale = Math.min(
+        availableWidth / 1600,
+        availableHeight / 900
+      );
+
+      document.documentElement.style.setProperty("--slide-scale", String(scale));
+    };
+
+    updateDeckScale();
+    window.addEventListener("resize", updateDeckScale);
+  </script>
+</body>
+</html>
