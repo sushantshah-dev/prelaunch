@@ -64,7 +64,16 @@ def get_current_user(request):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT users.id, users.name, users.email, users.selected_plan
+                SELECT
+                    users.id,
+                    users.name,
+                    users.email,
+                    users.selected_plan,
+                    users.lemonsqueezy_customer_id,
+                    users.lemonsqueezy_subscription_id,
+                    users.lemonsqueezy_variant_id,
+                    users.lemonsqueezy_subscription_status,
+                    users.lemonsqueezy_last_synced_at
                 FROM sessions
                 JOIN users ON users.id = sessions.user_id
                 WHERE sessions.token_hash = %s AND sessions.expires_at > NOW()
@@ -82,6 +91,11 @@ def get_current_user(request):
         "name": row[1],
         "email": row[2],
         "selected_plan": row[3],
+        "lemonsqueezy_customer_id": row[4],
+        "lemonsqueezy_subscription_id": row[5],
+        "lemonsqueezy_variant_id": row[6],
+        "lemonsqueezy_subscription_status": row[7],
+        "lemonsqueezy_last_synced_at": row[8],
     }
 
 
