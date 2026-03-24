@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if status_message %}
+    <div class="success">{{ status_message }}</div>
+  {% endif %}
+
+  <section class="project-workspace">
+    <div class="project-workspace-main">
+      <article class="panel test-result-card">
+        <div class="test-result-inner">
+          <div class="section-head compact">
+            <div>
+              <div class="meta">Latest reads</div>
+              <h2>Current signal from the newest project material.</h2>
+            </div>
+          </div>
+
+          {% if latest_material %}
+            <div class="project-dashboard-grid">
+              {% for review in reviews %}
+                <button
+                  class="analysis-card analysis-link{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none %} is-locked{% endif %}"
+                  type="button"
+                  data-review-control
+                  data-review-key="{{ review.key }}"
+                  aria-pressed="{% if initial_review_key == review.key %}true{% else %}false{% endif %}"
+                >
+                  <div class="analysis-head">
+                    <div class="meta">{{ review.label }}</div>
+                    <div class="analysis-score">
+                      {% if review.score is not none %}
+                        {{ "%.0f"|format(review.score) }}
+                      {% else %}
+                        Locked
+                      {% endif %}
+                    </div>
+                  </div>
+                </button>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <h2>No reads yet.</h2>
+              <p>Add project material below and the latest set of reads will appear here.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+      {% if reviews %}
+        <article class="panel test-result-card review-carousel" id="project-review">
+          <div class="test-result-inner review-carousel-inner">
+            <div class="section-head compact">
+              <div>
+                <div class="meta">In-depth review</div>
+                <h2>Explore each read in the same space.</h2>
+              </div>
+            </div>
+
+            <div class="review-stage" data-review-stage>
+              <div
+                class="review-track"
+                data-review-track
+                style="transform: translate3d(0, 0, 0);"
+              >
+                {% for review in reviews %}
+                  <section
+                    class="review-slide{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none %} is-locked{% endif %}"
+                    data-review-slide="{{ review.key }}"
+                    aria-hidden="{% if initial_review_key == review.key %}false{% else %}true{% endif %}"
+                  >
+                    <div class="review-shell">
+                      <div class="review-header">
+                        <div>
+                          <div class="meta">{{ review.label }}</div>
+                          <h2>{{ review.label }} review.</h2>
+                        </div>
+                        <div class="analysis-score">
+                          {% if review.score is not none %}
+                            {{ "%.0f"|format(review.score) }}
+                          {% else %}
+                            Locked
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      {% if review.sections["layout"] == "idea" %}
+                        <div class="idea-simulation">
+                          <div class="persona-stack">
+                            {% for row in review.sections["simulation_rows"] %}
+                              <article class="persona-row">
+                                <div class="persona-key">{{ row[0] }}</div>
+                                <div class="persona-value">{{ row[1] }}</div>
+                              </article>
+                            {% endfor %}
+                          </div>
+                        </div>
+
+                        <div class="persona-stack">
+                          {% for row in review.sections["rows"] %}
+                            <div class="persona-row">
+                              <div class="persona-key">{{ row[0] }}</div>
+                              <div class="persona-value">{{ row[1] }}</div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% elif review.sections["layout"] == "sources" %}
+                        <div class="review-content review-content-mono">
+                          {% for item in review.sections["items"] %}
+                            <article class="source-quote">
+                              <div class="source-label">{{ item[0] }}</div>
+                              <p>{{ item[1] }}</p>
+                            </article>
+                          {% endfor %}
+                          <div class="research-footer">{{ review.sections["footer"] }}</div>
+                        </div>
+                      {% elif review.sections["layout"] == "perception" %}
+                        <div class="review-content review-content-mono">
+                          <div class="terminal-stack">
+                            {% for item in review.sections["responses"] %}
+                              <article class="terminal-block">
+                                <div class="terminal-kicker">{{ item[0] }}</div>
+                                <div class="terminal-text">{{ item[1] }}</div>
+                              </article>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% else %}
+                        <div class="review-content review-content-mono">
+                          <div class="terminal-stack">
+                            {% for item in review.sections["items"] %}
+                              <article class="terminal-block">
+                                <div class="terminal-kicker">{{ item[0] }}</div>
+                                <div class="terminal-text">{{ item[1] }}</div>
+                              </article>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </section>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </article>
+      {% endif %}
+
+      <article class="panel prompt-card project-prompt-bar" id="project-new-material">
+        <div class="prompt-card-inner">
+          <form class="form prompt-form" method="post" action="{{ base_path }}/projects/{{ project.id }}/materials">
+            <div class="field">
+              <textarea id="content" name="content" rows="3" placeholder="Add new project material..." required></textarea>
+            </div>
+            <button class="button primary" type="submit">Add</button>
+          </form>
+        </div>
+      </article>
+      <article class="panel history-panel" id="project-material-history">
+        <div class="history-panel-inner">
+          <div>
+            <div class="meta">Material history</div>
+            <h2>Every addition stays attached to the project.</h2>
+          </div>
+        {% if materials %}
+          <div class="history-list">
+            {% for material in materials %}
+              <article class="history-item">
+                <div class="history-item-head">
+                  <div class="meta">Entry {{ loop.index }}</div>
+                  <div class="helper">{{ material.created_at.strftime("%b %d, %Y %H:%M") }}</div>
+                </div>
+                <div class="history-copy">{{ material.content }}</div>
+                <div class="history-metrics">
+                  <span>Idea {{ "%.0f"|format(material.idea_score) }}</span>
+                  {% if material.live_signal_score is not none %}<span>Live {{ "%.0f"|format(material.live_signal_score) }}</span>{% endif %}
+                  {% if material.perception_score is not none %}<span>Perception {{ "%.0f"|format(material.perception_score) }}</span>{% endif %}
+                  {% if material.spread_score is not none %}<span>Spread {{ "%.0f"|format(material.spread_score) }}</span>{% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <h2>No history yet.</h2>
+            <p>Your project history starts with the first material you add.</p>
+          </div>
+        {% endif %}
+        </div>
+      </article>
+
+      <article class="panel project-card">
+        <div class="project-card-inner">
+          <div class="project-header">
+            <div>
+              <div class="meta">Project settings</div>
+              <h2>{{ project.name }}</h2>
+              <p>{{ project.description or "No project description yet." }}</p>
+            </div>
+            <form method="post" action="{{ base_path }}/projects/{{ project.id }}/delete">
+              <button class="button secondary" type="submit">Delete Project</button>
+            </form>
+          </div>
+
+          <form class="form project-form" method="post" action="{{ base_path }}/projects/{{ project.id }}/update">
+            <div class="field">
+              <label for="name-{{ project.id }}">Project name</label>
+              <input id="name-{{ project.id }}" name="name" type="text" value="{{ project.name }}" required>
+            </div>
+
+            <div class="field">
+              <label for="description-{{ project.id }}">Description</label>
+              <input id="description-{{ project.id }}" name="description" type="text" value="{{ project.description }}">
+            </div>
+
+            <div class="actions">
+              <button class="button secondary" type="submit">Save Project</button>
+            </div>
+          </form>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  {% if reviews %}
+    <script>
+      (function () {
+        var controls = Array.prototype.slice.call(document.querySelectorAll("[data-review-control]"));
+        var slides = Array.prototype.slice.call(document.querySelectorAll("[data-review-slide]"));
+        var stage = document.querySelector("[data-review-stage]");
+        var track = document.querySelector("[data-review-track]");
+        if (!controls.length || !slides.length || !stage || !track) {
+          return;
+        }
+
+        var slideIndexByKey = {};
+        slides.forEach(function (slide, index) {
+          slideIndexByKey[slide.getAttribute("data-review-slide")] = index;
+        });
+
+        function syncStageHeight() {
+          var activeSlide = document.querySelector(".review-slide.is-active");
+          if (!activeSlide) {
+            return;
+          }
+          stage.style.height = activeSlide.offsetHeight + "px";
+        }
+
+        function setActiveReview(key) {
+          var activeIndex = slideIndexByKey[key];
+          if (typeof activeIndex !== "number") {
+            return;
+          }
+
+          controls.forEach(function (control) {
+            var isActive = control.getAttribute("data-review-key") === key;
+            control.classList.toggle("is-active", isActive);
+            control.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+
+          slides.forEach(function (slide) {
+            var isActive = slide.getAttribute("data-review-slide") === key;
+            slide.classList.toggle("is-active", isActive);
+            slide.setAttribute("aria-hidden", isActive ? "false" : "true");
+          });
+
+          track.style.transform = "translate3d(-" + (activeIndex * 100) + "%, 0, 0)";
+          window.requestAnimationFrame(syncStageHeight);
+
+          if (window.history && window.history.replaceState) {
+            var url = new URL(window.location.href);
+            url.searchParams.set("review", key);
+            window.history.replaceState({}, "", url.toString());
+          }
+        }
+
+        controls.forEach(function (control) {
+          control.addEventListener("click", function () {
+            setActiveReview(control.getAttribute("data-review-key"));
+          });
+        });
+
+        window.addEventListener("resize", syncStageHeight);
+        setActiveReview("{{ initial_review_key }}");
+      })();
+    </script>
+  {% endif %}
+{% endblock %}
