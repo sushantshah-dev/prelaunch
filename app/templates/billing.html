@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if status_message %}
+    <div class="success">{{ status_message }}</div>
+  {% endif %}
+
+  <div class="billing-hero">
+    <div>
+      <div class="meta">Current plan</div>
+      <div class="billing-plan">{{ user.selected_plan }}</div>
+      <p class="helper">Subscription status: {{ user.lemonsqueezy_subscription_status or "No active subscription yet" }}</p>
+    </div>
+
+    <div class="billing-actions">
+      <form method="post" action="{{ base_path }}/logout">
+        <button class="button secondary" type="submit">Log Out</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="billing-grid">
+    <div class="billing-card panel">
+      <div class="billing-card-inner">
+        <div class="meta">Free</div>
+        <h2>Get a fast first read on an idea.</h2>
+        <p>Best for quick exploration when you only need the core validation loop.</p>
+        <div class="plan-list">
+          <div>3 idea tests</div>
+          <div>One-off prompt box in the workspace</div>
+          <div>Upgrade prompts for locked features</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="billing-card panel">
+      <div class="billing-card-inner">
+        <div class="meta">Starter</div>
+        <h2>Turn quick reads into ongoing validation.</h2>
+        <p>Built for solo builders who want projects, saved material history, and live signals.</p>
+        <div class="plan-list">
+          <div>Everything in Free</div>
+          <div>30 idea tests / month</div>
+          <div>Projects with material history</div>
+          <div>Live Signals</div>
+        </div>
+        {% if user.billing_enabled %}
+          {% if user.selected_plan == "Starter" %}
+            <button class="button secondary" type="button" disabled>Current Starter Plan</button>
+          {% else %}
+            <form method="post" action="{{ base_path }}/settings/checkout">
+              <input type="hidden" name="plan" value="Starter">
+              <button class="button {% if user.selected_plan == 'Free' %}primary{% else %}secondary{% endif %}" type="submit">
+                {% if user.selected_plan == "Pro" %}Switch to Starter{% else %}Upgrade to Starter{% endif %}
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          <div class="helper">Add Lemon Squeezy credentials to enable plan changes.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="billing-card panel featured">
+      <div class="billing-card-inner">
+        <div class="meta">Pro</div>
+        <h2>Pressure-test positioning before launch.</h2>
+        <p>Best for teams refining messaging, perception, and spread before they commit to the roadmap.</p>
+        <div class="plan-list">
+          <div>Everything in Starter</div>
+          <div>120 idea tests / month</div>
+          <div>Perception Test</div>
+          <div>Spread Simulation</div>
+        </div>
+        {% if user.billing_enabled %}
+          {% if user.selected_plan == "Pro" %}
+            <button class="button secondary" type="button" disabled>Current Pro Plan</button>
+          {% else %}
+            <form method="post" action="{{ base_path }}/settings/checkout">
+              <input type="hidden" name="plan" value="Pro">
+              <button class="button primary" type="submit">
+                Upgrade to Pro
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          <div class="helper">Add Lemon Squeezy credentials to enable plan changes.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid dashboard-grid">
+    <div class="grid-item">
+      <div class="meta">Email</div>
+      <div>{{ user.email }}</div>
+    </div>
+
+    <div class="grid-item">
+      <div class="meta">Customer</div>
+      <div>{{ user.lemonsqueezy_customer_id or "Not linked yet" }}</div>
+    </div>
+
+    <div class="grid-item">
+      <div class="meta">Subscription</div>
+      <div>{{ user.lemonsqueezy_subscription_id or "No subscription on file" }}</div>
+    </div>
+  </div>
+{% endblock %}
