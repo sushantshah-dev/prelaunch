@@ -20,6 +20,11 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://prelaunch:prelaunch@db:5432/prelaunch
+      LEMONSQUEEZY_API_KEY: ${LEMONSQUEEZY_API_KEY}
+      LEMONSQUEEZY_STORE_ID: ${LEMONSQUEEZY_STORE_ID}
+      LEMONSQUEEZY_STARTER_VARIANT_ID: ${LEMONSQUEEZY_STARTER_VARIANT_ID}
+      LEMONSQUEEZY_PRO_VARIANT_ID: ${LEMONSQUEEZY_PRO_VARIANT_ID}
+      LEMONSQUEEZY_TEST_MODE: ${LEMONSQUEEZY_TEST_MODE:-true}
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +39,7 @@ services:
       POSTGRES_USER: prelaunch
       POSTGRES_PASSWORD: prelaunch
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data
       - ./app/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U prelaunch -d prelaunch"]
@@ -47,5 +52,3 @@ services:
 networks:
   prelaunch-net:
     driver: bridge
-volumes:
-  postgres-data:

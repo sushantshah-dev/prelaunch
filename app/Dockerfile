@@ -9,9 +9,12 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py ./
+COPY api.py ./
 COPY auth.py ./
 COPY config.py ./
 COPY db.py ./
+COPY lemonsqueezy.py ./
+COPY projects.py ./
 COPY views.py ./
 COPY init.sql ./
 COPY templates ./templates
