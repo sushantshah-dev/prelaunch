@@ -1,0 +1,74 @@
+@media (max-width: 920px) {
+  .wrap {
+    width: min(calc(100% - 24px), 760px);
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    min-height: auto;
+  }
+
+  .mobile-brand {
+    display: inline-flex;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  .billing-grid,
+  .workspace-grid,
+  .analysis-grid,
+  .project-dashboard-grid,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-hero {
+    flex-direction: column;
+  }
+
+  .metrics-grid,
+  .score-grid,
+  .pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-workspace {
+    padding-bottom: 16px;
+  }
+
+  .project-prompt-bar {
+    position: static;
+    width: auto;
+    transform: none;
+    left: auto;
+    bottom: auto;
+  }
+
+  .project-prompt-bar .prompt-form {
+    grid-template-columns: 1fr;
+  }
+
+  .review-stage {
+    min-height: 0;
+  }
+
+  .review-header,
+  .persona-row,
+  .review-grid-split {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .section-head,
+  .project-row,
+  .project-header {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

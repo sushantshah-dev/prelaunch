@@ -8,19 +8,206 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="nav">
-      <a class="brand" href="/index.html">Prelaunch / app</a>
-    </div>
-    <div class="shell">
-      <div class="page-copy">
-        {% if eyebrow %}<div class="eyebrow">{{ eyebrow }}</div>{% endif %}
-        {% if heading %}<h1>{{ heading }}</h1>{% endif %}
-        {% if subtext %}<p class="subtext">{{ subtext }}</p>{% endif %}
+    <div class="app-shell">
+      {% if current_user %}
+        {% set current_plan = current_user.selected_plan or "Free" %}
+        {% set starter_or_above = current_plan in ["Starter", "Pro"] %}
+        {% set pro_only = current_plan == "Pro" %}
+        {% set projects_root = base_path ~ '/projects' %}
+        {% set projects_active = request.path == projects_root or request.path.startswith(projects_root ~ '/') %}
+        {% set tests_root = base_path ~ '/test/' %}
+        {% set tests_active = request.path.startswith(tests_root) or request.path == base_path ~ '/projects' %}
+
+        <aside class="sidebar panel">
+          <div class="sidebar-inner">
+            <div class="sidebar-brand">
+              <a class="brand" href="{{ base_path }}">Prelaunch / app</a>
+              <div class="plan-chip">{{ current_plan }}</div>
+            </div>
+
+            <a
+              class="button primary sidebar-cta"
+              href="{{ base_path }}/test/new"
+            >
+              + New Test
+            </a>
+
+            <nav class="sidebar-nav">
+              <div class="sidebar-group">
+                <div class="sidebar-heading-row">
+                  <div class="sidebar-heading">Projects</div>
+                  {% if sidebar_projects and sidebar_projects|length > 2 %}
+                    <button
+                      class="sidebar-history-toggle"
+                      type="button"
+                      data-sidebar-project-toggle
+                      aria-label="Expand projects"
+                      title="Expand projects"
+                    >
+                      <span class="sidebar-history-toggle-line" aria-hidden="true"></span>
+                      <span class="sidebar-history-toggle-chevron" aria-hidden="true"></span>
+                    </button>
+                  {% endif %}
+                </div>
+                {% if sidebar_projects %}
+                  <div class="sidebar-history-list" data-sidebar-projects>
+                    {% for project in sidebar_projects %}
+                      <a
+                        class="sidebar-link sidebar-history-item{% if request.path == base_path ~ '/projects/' ~ project.id %} is-active{% endif %}{% if loop.index > 2 %} is-collapsed{% endif %}"
+                        href="{{ base_path }}/projects/{{ project.id }}"
+                      >
+                        <span class="sidebar-history-mode">{{ project.name }}</span>
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="sidebar-link sidebar-empty">No projects yet</div>
+                {% endif %}
+                <button
+                  class="sidebar-link sidebar-button{% if not starter_or_above %} is-locked{% endif %}"
+                  type="button"
+                  data-upgrade-plan="Starter"
+                  data-upgrade-label="Creating more projects requires the Starter plan."
+                  data-nav-href="{{ base_path }}/projects#new-project"
+                >
+                  + New Project
+                </button>
+              </div>
+
+              <div class="sidebar-divider"></div>
+
+              <div class="sidebar-group">
+                <div class="sidebar-heading-row">
+                  <div class="sidebar-heading">History</div>
+                  {% if sidebar_recent_tests and sidebar_recent_tests|length > 2 %}
+                    <button
+                      class="sidebar-history-toggle"
+                      type="button"
+                      data-sidebar-history-toggle
+                      aria-label="Expand history"
+                      title="Expand history"
+                    >
+                      <span class="sidebar-history-toggle-line" aria-hidden="true"></span>
+                      <span class="sidebar-history-toggle-chevron" aria-hidden="true"></span>
+                    </button>
+                  {% endif %}
+                </div>
+                {% if sidebar_recent_tests %}
+                  <div class="sidebar-history-list" data-sidebar-history>
+                    {% for test in sidebar_recent_tests %}
+                      <a
+                        class="sidebar-link sidebar-history-item{% if request.path == base_path ~ '/test/' ~ test.id %} is-active{% endif %}{% if loop.index > 2 %} is-collapsed{% endif %}"
+                        href="{{ base_path }}/test/{{ test.id }}"
+                      >
+                        <span class="sidebar-history-mode">{{ test.mode|replace("_", " ")|title }}</span>
+                        <span class="sidebar-history-date">{{ test.created_at.strftime("%b %d") }}</span>
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <a class="sidebar-link{% if tests_active %} is-active{% endif %}" href="{{ base_path }}/projects#recent-tests">No recent tests</a>
+                {% endif %}
+              </div>
+
+              <div class="sidebar-divider"></div>
+
+              <div class="sidebar-group">
+                <div class="sidebar-heading">Account</div>
+                <a class="sidebar-link{% if request.path == base_path ~ '/billing' or request.path == base_path ~ '/settings' %} is-active{% endif %}" href="{{ base_path }}/settings">Settings</a>
+              </div>
+            </nav>
+          </div>
+        </aside>
+      {% endif %}
+
+      <div class="content-shell">
+        {% if not current_user %}
+          <div class="nav">
+            <a class="brand" href="{{ base_path }}">Prelaunch / app</a>
+          </div>
+        {% else %}
+          <div class="nav mobile-nav">
+            <a class="brand mobile-brand" href="{{ base_path }}">Prelaunch / app</a>
+          </div>
+        {% endif %}
+        <div class="shell">
+          <div class="page-copy">
+            {% if eyebrow %}<div class="eyebrow">{{ eyebrow }}</div>{% endif %}
+            {% if heading %}<h1>{{ heading }}</h1>{% endif %}
+            {% if subtext %}<p class="subtext">{{ subtext }}</p>{% endif %}
+          </div>
+          {% if not (content_panel is defined and not content_panel) %}
+            <section class="panel card">
+          {% endif %}
+          {% block content %}{% endblock %}
+          {% if not (content_panel is defined and not content_panel) %}
+            </section>
+          {% endif %}
+        </div>
       </div>
-      <section class="panel card">
-        {% block content %}{% endblock %}
-      </section>
     </div>
   </div>
+
+  <form id="upgrade-form" method="post" action="{{ base_path }}/settings/checkout" hidden>
+    <input id="upgrade-plan-input" type="hidden" name="plan" value="">
+  </form>
+
+  <script>
+    document.querySelectorAll("[data-upgrade-plan]").forEach(function (element) {
+      element.addEventListener("click", function (event) {
+        if (!element.classList.contains("is-locked")) {
+          var href = element.getAttribute("data-nav-href");
+          if (href) {
+            window.location.href = href;
+          }
+          return;
+        }
+
+        event.preventDefault();
+        var plan = element.getAttribute("data-upgrade-plan");
+        var label = element.getAttribute("data-upgrade-label") || "This feature requires an upgrade.";
+        var confirmed = window.confirm(label + " Upgrade to " + plan + " now?");
+        if (!confirmed) {
+          return;
+        }
+
+        var form = document.getElementById("upgrade-form");
+        var input = document.getElementById("upgrade-plan-input");
+        input.value = plan;
+        form.submit();
+      });
+    });
+
+    function bindSidebarExpander(listSelector, toggleSelector, expandedLabel, collapsedLabel) {
+      document.querySelectorAll(listSelector).forEach(function (list) {
+        var container = list.closest(".sidebar-group");
+        var button = container ? container.querySelector(toggleSelector) : null;
+        if (!button) {
+          return;
+        }
+
+        button.addEventListener("click", function () {
+          var expanded = list.classList.toggle("is-expanded");
+          button.classList.toggle("is-expanded", expanded);
+          button.setAttribute("aria-label", expanded ? expandedLabel : collapsedLabel);
+          button.setAttribute("title", expanded ? expandedLabel : collapsedLabel);
+        });
+      });
+    }
+
+    bindSidebarExpander(
+      "[data-sidebar-history]",
+      "[data-sidebar-history-toggle]",
+      "Collapse history",
+      "Expand history"
+    );
+
+    bindSidebarExpander(
+      "[data-sidebar-projects]",
+      "[data-sidebar-project-toggle]",
+      "Collapse projects",
+      "Expand projects"
+    );
+  </script>
 </body>
 </html>

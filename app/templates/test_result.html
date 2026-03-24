@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if status_message %}
+    <div class="success">{{ status_message }}</div>
+  {% endif %}
+
+  <article class="panel test-result-card">
+    <div class="test-result-inner">
+      <div class="section-head compact">
+        <div>
+          <div class="meta">{{ test.mode|replace("_", " ")|title }}</div>
+          <h2>Result space for test {{ test.id }}.</h2>
+        </div>
+        <div class="actions">
+          <a class="button secondary" href="{{ base_path }}/test/new">New Test</a>
+          {% if can_manage_projects %}
+            <form method="post" action="{{ base_path }}/tests/{{ test.id }}/convert">
+              <button class="button primary" type="submit">Convert To Project</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="prompt-preview">{{ test.prompt }}</div>
+      <div class="analysis-grid">
+        <section class="analysis-card">
+          <div class="analysis-head">
+            <div class="meta">Idea Test</div>
+            <div class="analysis-score">{{ "%.0f"|format(test.idea_score) }}</div>
+          </div>
+          <p>{{ test.idea_summary }}</p>
+        </section>
+
+        <section class="analysis-card{% if not has_live_signals %} is-locked{% endif %}">
+          <div class="analysis-head">
+            <div class="meta">Live Signals</div>
+            <div class="analysis-score">
+              {% if test.live_signal_score is not none %}
+                {{ "%.0f"|format(test.live_signal_score) }}
+              {% else %}
+                Locked
+              {% endif %}
+            </div>
+          </div>
+          <p>
+            {% if test.live_signal_summary %}
+              {{ test.live_signal_summary }}
+            {% else %}
+              Upgrade to Starter to unlock live-signal reads.
+            {% endif %}
+          </p>
+        </section>
+
+        <section class="analysis-card{% if not has_pro_features %} is-locked{% endif %}">
+          <div class="analysis-head">
+            <div class="meta">Perception Test</div>
+            <div class="analysis-score">
+              {% if test.perception_score is not none %}
+                {{ "%.0f"|format(test.perception_score) }}
+              {% else %}
+                Locked
+              {% endif %}
+            </div>
+          </div>
+          <p>
+            {% if test.perception_summary %}
+              {{ test.perception_summary }}
+            {% else %}
+              Upgrade to Pro to unlock perception analysis.
+            {% endif %}
+          </p>
+        </section>
+
+        <section class="analysis-card{% if not has_pro_features %} is-locked{% endif %}">
+          <div class="analysis-head">
+            <div class="meta">Spread Simulation</div>
+            <div class="analysis-score">
+              {% if test.spread_score is not none %}
+                {{ "%.0f"|format(test.spread_score) }}
+              {% else %}
+                Locked
+              {% endif %}
+            </div>
+          </div>
+          <p>
+            {% if test.spread_summary %}
+              {{ test.spread_summary }}
+            {% else %}
+              Upgrade to Pro to unlock spread analysis.
+            {% endif %}
+          </p>
+        </section>
+      </div>
+    </div>
+  </article>
+{% endblock %}

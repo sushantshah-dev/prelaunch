@@ -1,0 +1,80 @@
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.metric-card {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.metric-card.featured {
+  background:
+    radial-gradient(circle at top left, rgba(118,167,255,0.18), transparent 46%),
+    rgba(255,255,255,0.04);
+}
+
+.metric-value {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  letter-spacing: -0.06em;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.section-head.compact {
+  margin-bottom: 0;
+}
+
+.project-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.95fr);
+  gap: 16px;
+}
+
+.workspace-main,
+.workspace-sidebar,
+.project-workspace-main {
+  display: grid;
+  gap: 16px;
+}
+
+.project-workspace {
+  display: grid;
+  gap: 16px;
+  padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+}
+
+.project-dashboard-grid,
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-row,
+.project-card-inner,
+.project-editor-inner {
+  display: grid;
+  gap: 16px;
+}
+
+.project-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if status_message %}
+    <div class="success">{{ status_message }}</div>
+  {% endif %}
+
+  <section class="workspace-main">
+      {% if can_manage_projects %}
+        <article class="panel project-editor" id="new-project">
+          <div class="project-editor-inner">
+            <div class="meta">New project</div>
+
+            <form class="form project-form" method="post" action="{{ base_path }}/projects">
+              <div class="field">
+                <label for="name">Project name</label>
+                <input id="name" name="name" type="text" placeholder="Name your project" required>
+              </div>
+
+              <div class="field">
+                <label for="description">Description</label>
+                <input id="description" name="description" type="text" placeholder="Short context for this project">
+              </div>
+              <div class="actions">
+                <button class="button primary" type="submit">Create</button>
+              </div>
+            </form>
+          </div>
+        </article>
+      {% else %}
+        <div class="empty-state">
+          <h2>Projects start on Starter.</h2>
+          <p>Free is for quick one-off tests. Upgrade when you want saved project history and live signals.</p>
+          <a class="button primary" href="{{ base_path }}/settings">Upgrade to Starter</a>
+        </div>
+      {% endif %}
+
+      <article class="panel history-panel">
+        <div class="history-panel-inner">
+          <div>
+            <div class="meta">Projects</div>
+            <h2>Your saved workspaces.</h2>
+          </div>
+
+          {% if projects %}
+            <div class="history-list">
+              {% for project in projects %}
+                <a class="history-item history-link" href="{{ base_path }}/projects/{{ project.id }}">
+                  <div class="history-item-head">
+                    <div class="meta">{{ project.name }}</div>
+                    <div class="helper">{{ project.updated_at.strftime("%b %d") }}</div>
+                  </div>
+                  <div class="history-copy">{{ project.description or "No description yet." }}</div>
+                  <div class="history-metrics">
+                    <span>Idea {{ "%.0f"|format(project.idea_score) }}</span>
+                    <span>Live {{ "%.0f"|format(project.live_signal_score) }}</span>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% elif can_manage_projects %}
+            <div class="empty-state">
+              <h2>No projects yet.</h2>
+              <p>Create one above when a one-off test turns into something you want to keep iterating.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+  </section>
+{% endblock %}

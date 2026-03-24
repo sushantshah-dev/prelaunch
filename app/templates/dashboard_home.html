@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="meta">Projects</div>
+      <div class="metric-value">{{ stats.count }}</div>
+      <p class="helper">Active projects contributing to the dashboard average.</p>
+    </div>
+
+    <div class="metric-card featured">
+      <div class="meta">Average perception</div>
+      <div class="metric-value">{{ "%.1f"|format(stats.perception_score) }}</div>
+      <p class="helper">Your current cross-project perception score.</p>
+    </div>
+
+    <div class="metric-card">
+      <div class="meta">Average idea</div>
+      <div class="metric-value">{{ "%.1f"|format(stats.idea_score) }}</div>
+      <p class="helper">How strong the raw idea looks across the portfolio.</p>
+    </div>
+
+    <div class="metric-card">
+      <div class="meta">Average spread</div>
+      <div class="metric-value">{{ "%.1f"|format(stats.spread_score) }}</div>
+      <p class="helper">How clearly the message carries from one person to the next.</p>
+    </div>
+
+    <div class="metric-card">
+      <div class="meta">Average live signals</div>
+      <div class="metric-value">{{ "%.1f"|format(stats.live_signal_score) }}</div>
+      <p class="helper">The ambient strength of the market signal around your projects.</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div>
+      <div class="meta">Recent projects</div>
+      <h2>What is pulling your average up or down.</h2>
+    </div>
+    <a class="button secondary" href="{{ base_path }}/projects">Manage Projects</a>
+  </div>
+
+  <div class="project-stack">
+    {% if projects %}
+      {% for project in projects %}
+        <article class="project-row">
+          <div>
+            <div class="project-name">{{ project.name }}</div>
+            <p class="helper">{{ project.description or "No description yet." }}</p>
+          </div>
+          <div class="project-metrics">
+            <span>Idea {{ "%.0f"|format(project.idea_score) }}</span>
+            <span>Perception {{ "%.0f"|format(project.perception_score) }}</span>
+            <span>Spread {{ "%.0f"|format(project.spread_score) }}</span>
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <h2>No projects yet.</h2>
+        <p>Create your first project to start generating average perception stats on the dashboard.</p>
+        {% if current_user.selected_plan in ["Starter", "Pro"] %}
+          <a class="button primary" href="{{ base_path }}/projects#new-project">Create Project</a>
+        {% else %}
+          <a class="button primary" href="{{ base_path }}/settings">Upgrade for Projects</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
