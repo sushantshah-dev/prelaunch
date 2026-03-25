@@ -11,6 +11,31 @@
 
   <section class="project-workspace">
     <div class="project-workspace-main">
+      {% if signal_snapshot %}
+        <article class="panel signal-snapshot-card">
+          <div class="signal-snapshot-inner">
+            <div>
+              <div class="signal-title">Signal snapshot</div>
+              <div class="metric">
+                <div class="signal-metric-value">{{ signal_snapshot.interest }}%</div>
+                <div class="signal-metric-copy">{{ signal_snapshot.summary }}</div>
+              </div>
+            </div>
+
+            <div class="mini-bars">
+              {% for bar in signal_snapshot.bars %}
+                <div>
+                  {{ bar.label }}
+                  <span><i class="mini-fill" style="width: {{ bar.value }}%;"></i></span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="signal-note">{{ signal_snapshot.note }}</div>
+          </div>
+        </article>
+      {% endif %}
+
       <article class="panel test-result-card">
         <div class="test-result-inner">
           <div class="section-head compact">
