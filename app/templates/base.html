@@ -6,8 +6,8 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" href="{{ base_path }}/static/app.css">
 </head>
-<body>
-  <div class="wrap">
+<body class="{{ body_class or '' }}">
+  <div class="wrap{% if wrap_class %} {{ wrap_class }}{% endif %}">
     <div class="app-shell">
       {% if current_user %}
         {% set current_plan = current_user.selected_plan or "Free" %}

@@ -375,10 +375,7 @@ def register_context(app):
 def render_auth_page(mode, *, plan="Free", error="", values=None, subtext=None, status_code=200):
     values = values or {}
 
-    if mode == "signup":
-        heading = "Create an account and step into the app."
-    else:
-        heading = "Log back in to continue."
+    heading = "Join Prelaunch" if mode == "signup" else "Welcome back"
 
     subtext = ""
 
@@ -389,6 +386,8 @@ def render_auth_page(mode, *, plan="Free", error="", values=None, subtext=None, 
             eyebrow="Authenticate",
             heading=heading,
             subtext=subtext,
+            body_class="auth-page",
+            wrap_class="wrap-auth",
             mode=mode,
             plan=plan,
             error=error,
