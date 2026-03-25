@@ -170,8 +170,12 @@ def _spread_chain(text):
     ]
 
 
+def _analysis_source_text(item):
+    return item.get("content") or item.get("prompt") or ""
+
+
 def _build_review_sections(review, latest_material):
-    content = latest_material["content"]
+    content = _analysis_source_text(latest_material)
     focus = _review_focus_phrase(content)
     audience = _infer_audience(content)
     channel = _infer_channel(content)
@@ -232,46 +236,86 @@ def _build_review_sections(review, latest_material):
     }
 
 
-def project_review_options(project, latest_material):
-    if not latest_material:
+def _score_or_fallback(value, fallback):
+    return float(value) if value is not None else float(fallback)
+
+
+def review_options_for_analysis(analysis_item, *, review_base_href=""):
+    if not analysis_item:
         return []
 
     reviews = [
         {
             "key": "idea",
             "label": "Idea",
-            "score": latest_material["idea_score"],
-            "summary": latest_material["idea_summary"],
+            "score": analysis_item["idea_score"],
+            "summary": analysis_item["idea_summary"],
             "detail": "Use this read to tighten the core promise, audience, and outcome before investing more effort.",
         },
         {
             "key": "live_signals",
             "label": "Live Signals",
-            "score": latest_material["live_signal_score"],
-            "summary": latest_material["live_signal_summary"] or "Upgrade to Starter to unlock this review.",
+            "score": analysis_item["live_signal_score"],
+            "summary": analysis_item["live_signal_summary"] or "Upgrade to Starter to unlock this review.",
             "detail": "Use this read to pressure-test demand language, search behavior, and channel fit.",
         },
         {
             "key": "perception",
             "label": "Perception",
-            "score": latest_material["perception_score"],
-            "summary": latest_material["perception_summary"] or "Upgrade to Pro to unlock this review.",
+            "score": analysis_item["perception_score"],
+            "summary": analysis_item["perception_summary"] or "Upgrade to Pro to unlock this review.",
             "detail": "Use this read to refine how the idea feels to the audience, especially trust and positioning.",
         },
         {
             "key": "spread",
             "label": "Spread",
-            "score": latest_material["spread_score"],
-            "summary": latest_material["spread_summary"] or "Upgrade to Pro to unlock this review.",
+            "score": analysis_item["spread_score"],
+            "summary": analysis_item["spread_summary"] or "Upgrade to Pro to unlock this review.",
             "detail": "Use this read to improve retellability and make the concept easier to carry from person to person.",
         },
     ]
 
     for review in reviews:
-        review["href"] = f"{BASE_PATH}/projects/{project['id']}?review={review['key']}#project-review"
-        review["sections"] = _build_review_sections(review, latest_material)
+        if review_base_href:
+            review["href"] = f"{review_base_href}?review={review['key']}#project-review"
+        review["sections"] = _build_review_sections(review, analysis_item)
 
     return reviews
+
+
+def build_signal_snapshot(analysis_item):
+    if not analysis_item:
+        return None
+
+    idea_score = _score_or_fallback(analysis_item.get("idea_score"), 0)
+    live_signal_score = _score_or_fallback(analysis_item.get("live_signal_score"), idea_score)
+    perception_score = _score_or_fallback(analysis_item.get("perception_score"), idea_score)
+    spread_score = _score_or_fallback(analysis_item.get("spread_score"), idea_score)
+
+    interest = round((idea_score + perception_score + spread_score) / 3)
+    willingness = round((perception_score + live_signal_score) / 2)
+    clarity = round((idea_score + spread_score) / 2)
+    skepticism = round(max(0, min(100, 100 - perception_score)))
+
+    summary = analysis_item.get("idea_summary") or "The strongest responses appear when the payoff is clear right away."
+
+    return {
+        "interest": interest,
+        "summary": summary,
+        "bars": [
+            {"label": "Willingness to pay", "value": willingness},
+            {"label": "Initial clarity", "value": clarity},
+            {"label": "Skepticism risk", "value": skepticism},
+        ],
+        "note": "Signal first, before deeper positioning and spread work.",
+    }
+
+
+def project_review_options(project, latest_material):
+    return review_options_for_analysis(
+        latest_material,
+        review_base_href=f"{BASE_PATH}/projects/{project['id']}",
+    )
 
 
 def dashboard_page_context(user):
@@ -324,6 +368,10 @@ def test_new_page_context(user, *, error="", status_message=""):
 
 
 def test_result_page_context(user, test, *, error="", status_message=""):
+    reviews = review_options_for_analysis(test, review_base_href=f"{BASE_PATH}/test/{test['id']}")
+    initial_review_key = request.args.get("review", "idea")
+    if reviews and not any(review["key"] == initial_review_key for review in reviews):
+        initial_review_key = reviews[0]["key"]
     return {
         "title": f"Prelaunch Test {test['id']}",
         "eyebrow": "Test Result",
@@ -331,6 +379,9 @@ def test_result_page_context(user, test, *, error="", status_message=""):
         "subtext": "This result lives on its own until you turn it into a project.",
         "user": user,
         "test": test,
+        "reviews": reviews,
+        "initial_review_key": initial_review_key,
+        "signal_snapshot": build_signal_snapshot(test),
         "error": error,
         "status_message": status_message,
         "can_manage_projects": has_plan_access(user, "Starter"),
@@ -356,6 +407,7 @@ def project_detail_page_context(user, project, *, error="", status_message=""):
         "project": project,
         "materials": materials,
         "latest_material": latest_material,
+        "signal_snapshot": build_signal_snapshot(latest_material),
         "reviews": reviews,
         "initial_review_key": initial_review_key,
         "error": error,
