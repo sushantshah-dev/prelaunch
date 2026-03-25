@@ -185,6 +185,71 @@
   padding: 0 26px;
 }
 
+.signal-snapshot-card {
+  border-radius: 28px;
+}
+
+.signal-snapshot-inner {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.signal-title {
+  color: rgba(255,255,255,0.78);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.signal-metric-value {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  letter-spacing: -0.08em;
+  line-height: 0.95;
+}
+
+.signal-metric-copy {
+  margin-top: 10px;
+  max-width: 52ch;
+  color: rgba(240,244,255,0.8);
+  line-height: 1.7;
+}
+
+.mini-bars {
+  display: grid;
+  gap: 14px;
+}
+
+.mini-bars div {
+  display: grid;
+  gap: 8px;
+  color: rgba(255,255,255,0.76);
+  font-size: 0.92rem;
+}
+
+.mini-bars span {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.mini-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(118,167,255,0.92), rgba(156,124,255,0.88));
+  box-shadow: 0 0 18px rgba(118,167,255,0.26);
+}
+
+.signal-note {
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+}
+
 .review-card {
   grid-template-columns: 1fr;
 }
@@ -490,4 +555,3 @@
 .pipeline-status {
   font-size: 1.1rem;
 }
-
