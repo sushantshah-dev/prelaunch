@@ -13,6 +13,7 @@ from auth import (
     signup_user,
 )
 from config import BASE_PATH, SESSION_COOKIE_NAME
+from config import FREE_CREDITS_ONCE, PRO_CREDITS_MONTHLY, STARTER_CREDITS_MONTHLY
 from lemonsqueezy import (
     LemonSqueezyError,
     create_subscription_change_request,
@@ -76,6 +77,9 @@ def billing_page_context(user, *, error="", status_message=""):
         "heading": "",
         "subtext": "",
         "user": user,
+        "free_credits_once": FREE_CREDITS_ONCE,
+        "starter_credits_monthly": STARTER_CREDITS_MONTHLY,
+        "pro_credits_monthly": PRO_CREDITS_MONTHLY,
         "error": error,
         "status_message": status_message,
     }
