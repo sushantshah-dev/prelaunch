@@ -6,6 +6,7 @@ import psycopg
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import ALLOWED_PLANS, SESSION_COOKIE_NAME, SESSION_DAYS
+from credits import get_user_credit_state
 from db import db_connection
 
 
@@ -86,6 +87,8 @@ def get_current_user(request):
     if not row:
         return None
 
+    credit_state = get_user_credit_state(row[0], row[3])
+
     return {
         "id": row[0],
         "name": row[1],
@@ -96,6 +99,9 @@ def get_current_user(request):
         "lemonsqueezy_variant_id": row[6],
         "lemonsqueezy_subscription_status": row[7],
         "lemonsqueezy_last_synced_at": row[8],
+        "credits_remaining": credit_state["credits_remaining"] if credit_state else 0,
+        "credits_renews_at": credit_state["credits_renews_at"] if credit_state else None,
+        "credits_plan": credit_state["credits_plan"] if credit_state else row[3],
     }
 
 

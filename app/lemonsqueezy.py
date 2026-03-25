@@ -11,6 +11,7 @@ from config import (
     LEMONSQUEEZY_STORE_ID,
     LEMONSQUEEZY_TEST_MODE,
 )
+from credits import get_user_credit_state
 from db import db_connection
 
 
@@ -439,4 +440,5 @@ def sync_user_subscription(user):
         "billing_customer_portal_url": customer_portal_url,
         "billing_update_payment_url": update_payment_url,
         "billing_change_request": change_resolution,
+        **(get_user_credit_state(user["id"], plan) or {}),
     }

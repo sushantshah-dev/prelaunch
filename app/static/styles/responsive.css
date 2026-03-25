@@ -32,6 +32,11 @@
     flex-direction: column;
   }
 
+  .page-copy-topline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .metrics-grid,
   .score-grid,
   .pipeline-grid {

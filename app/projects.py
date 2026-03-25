@@ -1,4 +1,11 @@
 from db import db_connection
+from credits import (
+    consume_user_credit,
+    credit_error_message,
+    project_creation_credit_cost,
+    project_test_credit_cost,
+    standalone_test_credit_cost,
+)
 
 
 def _project_from_row(row):
@@ -335,7 +342,12 @@ def get_project_stats(user_id):
     }
 
 
-def create_project(user_id, name, description):
+def create_project(user_id, name, description, plan, charge_credit=True):
+    if charge_credit:
+        credit_state = consume_user_credit(user_id, plan, project_creation_credit_cost())
+        if credit_state is False:
+            raise ValueError(credit_error_message(plan))
+
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -423,7 +435,7 @@ def list_project_materials(user_id, project_id):
     return [_material_from_row(row) for row in rows]
 
 
-def create_project_material(user_id, project_id, content, plan, mode="idea"):
+def create_project_material(user_id, project_id, content, plan, mode="idea", charge_credit=True):
     analysis = build_analysis(content, plan, mode=mode, context_label="this project")
 
     with db_connection() as conn:
@@ -440,6 +452,11 @@ def create_project_material(user_id, project_id, content, plan, mode="idea"):
             row = cur.fetchone()
             if not row:
                 return None
+
+            if charge_credit:
+                credit_state = consume_user_credit(user_id, plan, project_test_credit_cost())
+                if credit_state is False:
+                    raise ValueError(credit_error_message(plan))
 
             cur.execute(
                 """
@@ -500,6 +517,9 @@ def create_project_material(user_id, project_id, content, plan, mode="idea"):
 def create_one_off_test(user_id, prompt, plan, mode):
     normalized_mode = normalize_test_mode(mode)
     analysis = build_analysis(prompt, plan, mode=normalized_mode)
+    credit_state = consume_user_credit(user_id, plan, standalone_test_credit_cost())
+    if credit_state is False:
+        raise ValueError(credit_error_message(plan))
 
     with db_connection() as conn:
         with conn.cursor() as cur:
@@ -547,8 +567,10 @@ def convert_one_off_test_to_project(user_id, test_id, plan):
         user_id,
         _project_name_from_prompt(test["prompt"]),
         "Created from a one-off test.",
+        plan,
+        charge_credit=False,
     )
-    create_project_material(user_id, project_id, test["prompt"], plan, mode=test["mode"])
+    create_project_material(user_id, project_id, test["prompt"], plan, mode=test["mode"], charge_credit=False)
     return project_id
 
 

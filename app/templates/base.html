@@ -132,7 +132,14 @@
         {% endif %}
         <div class="shell">
           <div class="page-copy">
-            {% if eyebrow %}<div class="eyebrow">{{ eyebrow }}</div>{% endif %}
+            {% if eyebrow or current_user %}
+              <div class="page-copy-topline">
+                {% if eyebrow %}<div class="eyebrow">{{ eyebrow }}</div>{% endif %}
+                {% if current_user %}
+                  <div class="credit-chip">{{ current_user.credits_remaining }} credits</div>
+                {% endif %}
+              </div>
+            {% endif %}
             {% if heading %}<h1>{{ heading }}</h1>{% endif %}
             {% if subtext %}<p class="subtext">{{ subtext }}</p>{% endif %}
           </div>

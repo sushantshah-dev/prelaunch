@@ -27,6 +27,18 @@ SCHEMA_STATEMENTS = [
     ADD COLUMN IF NOT EXISTS lemonsqueezy_last_synced_at TIMESTAMPTZ
     """,
     """
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS credits_remaining INTEGER NOT NULL DEFAULT 0
+    """,
+    """
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS credits_renews_at TIMESTAMPTZ
+    """,
+    """
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS credits_plan TEXT
+    """,
+    """
     CREATE TABLE IF NOT EXISTS lemonsqueezy_subscriptions (
         id BIGINT PRIMARY KEY,
         store_id BIGINT,

@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS users (
     lemonsqueezy_variant_id BIGINT,
     lemonsqueezy_subscription_status TEXT,
     lemonsqueezy_last_synced_at TIMESTAMPTZ,
+    credits_remaining INTEGER NOT NULL DEFAULT 0,
+    credits_renews_at TIMESTAMPTZ,
+    credits_plan TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

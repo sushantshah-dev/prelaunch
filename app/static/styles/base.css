@@ -263,6 +263,14 @@ a {
   padding: 8px 2px 0;
 }
 
+.page-copy-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .eyebrow {
   display: inline-flex;
   padding: 9px 13px;
@@ -271,7 +279,18 @@ a {
   background: rgba(255,255,255,0.03);
   color: var(--muted);
   font-size: 0.84rem;
-  margin-bottom: 18px;
+}
+
+.credit-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(118, 167, 255, 0.18);
+  background: rgba(118, 167, 255, 0.08);
+  color: rgba(233, 240, 255, 0.94);
+  font-size: 0.84rem;
 }
 
 h1 {

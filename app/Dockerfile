@@ -12,6 +12,7 @@ COPY app.py ./
 COPY api.py ./
 COPY auth.py ./
 COPY config.py ./
+COPY credits.py ./
 COPY db.py ./
 COPY lemonsqueezy.py ./
 COPY projects.py ./

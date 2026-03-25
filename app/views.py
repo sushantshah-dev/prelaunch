@@ -575,7 +575,7 @@ def register_routes(app):
 
         try:
             values = project_values_from_request(request.form)
-            project_id = create_project(user["id"], **values)
+            project_id = create_project(user["id"], plan=user["selected_plan"], **values)
         except ValueError as error:
             return redirect(f"{BASE_PATH}/projects?{urlencode({'error': str(error)})}")
 
@@ -715,7 +715,10 @@ def register_routes(app):
                 f"{BASE_PATH}/settings?{urlencode({'error': 'Converting tests into projects requires the Starter plan.'})}"
             )
 
-        project_id = convert_one_off_test_to_project(user["id"], test_id, user["selected_plan"])
+        try:
+            project_id = convert_one_off_test_to_project(user["id"], test_id, user["selected_plan"])
+        except ValueError as error:
+            return redirect(f"{BASE_PATH}/test/{test_id}?{urlencode({'error': str(error)})}")
         if not project_id:
             return redirect(f"{BASE_PATH}/projects?{urlencode({'error': 'Test not found.'})}")
 
