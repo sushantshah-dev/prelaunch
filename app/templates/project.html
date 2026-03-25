@@ -154,6 +154,7 @@
       <article class="panel prompt-card project-prompt-bar" id="project-new-material">
         <div class="prompt-card-inner">
           <form class="form prompt-form" method="post" action="{{ base_path }}/projects/{{ project.id }}/materials">
+            <input type="hidden" name="review" value="{{ initial_review_key }}" data-review-input>
             <div class="field">
               <textarea id="content" name="content" rows="3" placeholder="Add new project material..." required></textarea>
             </div>
@@ -232,6 +233,7 @@
       (function () {
         var controls = Array.prototype.slice.call(document.querySelectorAll("[data-review-control]"));
         var slides = Array.prototype.slice.call(document.querySelectorAll("[data-review-slide]"));
+        var reviewInput = document.querySelector("[data-review-input]");
         var stage = document.querySelector("[data-review-stage]");
         var track = document.querySelector("[data-review-track]");
         if (!controls.length || !slides.length || !stage || !track) {
@@ -269,12 +271,19 @@
             slide.setAttribute("aria-hidden", isActive ? "false" : "true");
           });
 
+          if (reviewInput) {
+            reviewInput.value = key;
+          }
+
           track.style.transform = "translate3d(-" + (activeIndex * 100) + "%, 0, 0)";
           window.requestAnimationFrame(syncStageHeight);
 
           if (window.history && window.history.replaceState) {
             var url = new URL(window.location.href);
             url.searchParams.set("review", key);
+            if (url.searchParams.get("status")) {
+              url.searchParams.delete("status");
+            }
             window.history.replaceState({}, "", url.toString());
           }
         }

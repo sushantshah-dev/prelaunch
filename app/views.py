@@ -70,6 +70,11 @@ def test_mode_value_from_request(form):
     return normalize_test_mode(form.get("mode"))
 
 
+def review_key_from_request(form_or_args):
+    review = (form_or_args.get("review") or "").strip().lower()
+    return review if review in {"idea", "live_signals", "perception", "spread"} else ""
+
+
 def billing_page_context(user, *, error="", status_message=""):
     return {
         "title": "Prelaunch Settings",
@@ -641,14 +646,18 @@ def register_routes(app):
 
         try:
             prompt = prompt_value_from_request(request.form, "content")
+            review = review_key_from_request(request.form)
             material_id = create_project_material(user["id"], project_id, prompt, user["selected_plan"])
             if not material_id:
                 raise ValueError("Project not found.")
         except ValueError as error:
             return redirect(f"{BASE_PATH}/projects/{project_id}?{urlencode({'error': str(error)})}")
 
+        params = {"status": "Material added to project history."}
+        if review:
+            params["review"] = review
         return redirect(
-            f"{BASE_PATH}/projects/{project_id}?{urlencode({'status': 'Material added to project history.'})}#project-material-history"
+            f"{BASE_PATH}/projects/{project_id}?{urlencode(params)}#project-material-history"
         )
 
     @app.post(f"{BASE_PATH}/projects/<int:project_id>/delete")
