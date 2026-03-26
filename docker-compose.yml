@@ -15,11 +15,18 @@ services:
       - prelaunch-net
   app:
     build:
-      context: ./app
+      context: .
+      dockerfile: app/Dockerfile
     container_name: prelaunch-app
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://prelaunch:prelaunch@db:5432/prelaunch
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_ANALYSIS_MODEL: ${OPENROUTER_ANALYSIS_MODEL:-nvidia/nemotron-3-nano-30b-a3b:free}
+      OPENROUTER_LIVE_SIGNALS_MODEL: ${OPENROUTER_LIVE_SIGNALS_MODEL:-nvidia/nemotron-3-nano-30b-a3b:free}
+      OPENROUTER_APP_URL: ${OPENROUTER_APP_URL:-}
+      OPENROUTER_APP_NAME: ${OPENROUTER_APP_NAME:-Prelaunch}
       LEMONSQUEEZY_API_KEY: ${LEMONSQUEEZY_API_KEY}
       LEMONSQUEEZY_STORE_ID: ${LEMONSQUEEZY_STORE_ID}
       LEMONSQUEEZY_STARTER_VARIANT_ID: ${LEMONSQUEEZY_STARTER_VARIANT_ID}
@@ -46,6 +53,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+    networks:
+      - prelaunch-net
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    container_name: prelaunch-worker
+    environment:
+      - WORKER_COUNT=2
+      - DATABASE_URL=postgresql://prelaunch:prelaunch@db:5432/prelaunch
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENROUTER_ANALYSIS_MODEL=${OPENROUTER_ANALYSIS_MODEL:-nvidia/nemotron-3-nano-30b-a3b:free}
+      - OPENROUTER_LIVE_SIGNALS_MODEL=${OPENROUTER_LIVE_SIGNALS_MODEL:-nvidia/nemotron-3-nano-30b-a3b:free}
+      - OPENROUTER_APP_URL=${OPENROUTER_APP_URL:-}
+      - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-Prelaunch}
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - prelaunch-net
