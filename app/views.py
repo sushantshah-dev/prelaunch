@@ -90,149 +90,238 @@ def billing_page_context(user, *, error="", status_message=""):
     }
 
 
-def _extract_review_keywords(text, limit=3):
-    keywords = []
-    for word in text.replace("\n", " ").split():
-        normalized = word.strip(".,!?;:()[]{}\"'").lower()
-        if len(normalized) < 5 or normalized in keywords:
-            continue
-        keywords.append(normalized)
-        if len(keywords) == limit:
-            break
-    return keywords
+def _analysis_payload(item):
+    payload = item.get("analysis_payload") or {}
+    return payload if isinstance(payload, dict) else {}
 
 
-def _review_focus_phrase(text):
-    keywords = _extract_review_keywords(text, limit=3)
-    return ", ".join(keywords) if keywords else "the clearest user outcome"
+def _payload_field_value(value):
+    if isinstance(value, dict) and "value" in value and "status" in value:
+        return value.get("value")
+    return value
 
 
-def _infer_audience(text):
-    lower = text.lower()
-    audience_map = [
-        ("founder", "Founders testing a clearer growth wedge"),
-        ("developer", "Developers looking to remove repeated workflow friction"),
-        ("marketer", "Marketers trying to tie the pitch to a measurable outcome"),
-        ("designer", "Designers responding to polish, clarity, and trust"),
-        ("student", "Students who engage only when the payoff is immediate"),
-        ("creator", "Creators scanning for signal, novelty, and shareability"),
-        ("team", "Small teams evaluating whether the promise feels concrete"),
-    ]
-    for needle, label in audience_map:
-        if needle in lower:
-            return label
-    return "Early adopters who need the value to feel obvious on first read"
+def _payload_is_pending(payload):
+    return payload.get("status") in {"pending", "processing"}
 
 
-def _infer_channel(text):
-    lower = text.lower()
-    if "reddit" in lower:
-        return "Reddit and community threads"
-    if "search" in lower or "keyword" in lower:
-        return "Search-driven intent"
-    if "newsletter" in lower:
-        return "Newsletter and creator channels"
-    if "social" in lower or "viral" in lower or "share" in lower:
-        return "Social and referral loops"
-    if "community" in lower:
-        return "Community-driven discovery"
-    return "Search and founder communities"
+def _truncate_text(value, limit=220):
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 1].rstrip()}..."
 
 
-def _infer_price_signal(text):
-    lower = text.lower()
-    if "$" in text or "price" in lower or "pricing" in lower:
-        return "Pricing is already part of the pitch, which helps intent feel real."
-    if "subscription" in lower or "monthly" in lower or "annual" in lower:
-        return "A recurring-price frame is implied, but the value exchange needs to feel tighter."
-    return "There is no price anchor yet, so intent may stay soft until the value is clearer."
+def _pipeline_score_text(score, summary):
+    if score is None:
+        return f"Loading... {summary or ''}".strip()
+    return f"{round(float(score))}: {summary or ''}"
 
 
-def _infer_trust_signal(text):
-    lower = text.lower()
-    if any(phrase in lower for phrase in ("proof", "data", "results", "traction", "customers", "users", "pilot")):
-        return "Concrete proof cues are present, which should raise trust for skeptical buyers."
-    return "Trust still depends on the framing alone, so examples or proof would meaningfully improve response."
+def pipeline_sections_for_item(item):
+    payload = _analysis_payload(item)
+    if not payload:
+        return []
 
+    sections = []
 
-def _spread_chain(text):
-    clean_text = " ".join(text.split())
-    if not clean_text:
-        clean_text = "An idea with an unclear payoff"
-    words = clean_text.split()
-    original = " ".join(words[:8]).strip(" ,.;") or clean_text[:48]
-    promise = _review_focus_phrase(clean_text)
-    return [
-        ("Original", original),
-        ("User A", f"It helps with {promise}."),
-        ("User B", "It sounds useful, but the exact outcome is still fuzzy." if len(words) > 16 else "I get the outcome quickly."),
-        ("User C", "The message starts to flatten into a generic category label." if len(words) > 20 else "The message survives retelling with minor drift."),
-    ]
+    target_audience = _payload_field_value(payload.get("target_audience"))
+    if target_audience:
+        sections.append({"title": "1. Target audience", "items": [("Audience", target_audience)]})
 
+    personas = _payload_field_value(payload.get("personas")) or []
+    if personas:
+        sections.append(
+            {
+                "title": "2. Personas",
+                "items": [
+                    (
+                        persona.get("display_name") or persona.get("id") or "Persona",
+                        _truncate_text(
+                            (
+                                f"{persona.get('age_band', '')} • "
+                                f"{persona.get('occupation', '')} • "
+                                f"{persona.get('income_band', '')}. "
+                                f"Current workaround: {persona.get('current_workaround', '')}."
+                            )
+                        ),
+                    )
+                    for persona in personas[:4]
+                ],
+            }
+        )
 
-def _analysis_source_text(item):
-    return item.get("content") or item.get("prompt") or ""
+    questionnaire_responses = _payload_field_value(payload.get("questionnaire_responses")) or []
+    if questionnaire_responses:
+        sections.append(
+            {
+                "title": "3. Persona questionnaire",
+                "items": [
+                    (
+                        response.get("persona_name") or response.get("persona_id") or "Persona",
+                        _truncate_text(
+                            next(
+                                (
+                                    answer.get("answer")
+                                    for answer in (response.get("answers") or [])
+                                    if answer.get("question") == "How would you describe this to someone else in one sentence?"
+                                ),
+                                "",
+                            )
+                            or next(
+                                (
+                                    answer.get("answer")
+                                    for answer in (response.get("answers") or [])
+                                    if answer.get("answer")
+                                ),
+                                "",
+                            ),
+                            limit=200,
+                        ),
+                    )
+                    for response in questionnaire_responses[:4]
+                ],
+            }
+        )
+
+    idea_review = _payload_field_value(payload.get("idea_review")) or {}
+    if idea_review:
+        sections.append(
+            {
+                "title": "4. Idea evaluation",
+                "items": [
+                    ("Signal summary", idea_review.get("signal_summary") or ""),
+                    ("What to do next", idea_review.get("what_to_do_next") or ""),
+                    ("Focus area", idea_review.get("focus_area") or ""),
+                ],
+            }
+        )
+
+    perception = _payload_field_value(payload.get("perception")) or {}
+    if perception:
+        response_items = [
+            (
+                response.get("persona_name") or "Persona",
+                _truncate_text(
+                    (
+                        f"Use/buy: {response.get('would_use_or_buy', '')}. "
+                        f"Expected price: {response.get('expected_price', '')}. "
+                        f"Worth it: {response.get('worth_it_assessment', '')}."
+                    ),
+                    limit=200,
+                ),
+            )
+            for response in (perception.get("responses") or [])[:4]
+        ]
+        if perception.get("summary"):
+            response_items.append(("Summary", perception["summary"]))
+        sections.append({"title": "5. Perception", "items": response_items})
+
+    word_of_mouth = _payload_field_value(payload.get("word_of_mouth")) or {}
+    if word_of_mouth:
+        chain_items = [
+            (
+                entry.get("persona_id") or f"Hop {index + 1}",
+                _truncate_text(entry.get("retold_gist") or entry.get("received_message") or ""),
+            )
+            for index, entry in enumerate((word_of_mouth.get("chain") or [])[:4])
+        ]
+        if word_of_mouth.get("summary"):
+            chain_items.append(("Summary", word_of_mouth["summary"]))
+        sections.append({"title": "6. Word of mouth", "items": chain_items})
+
+    summaries = _payload_field_value(payload.get("summaries")) or {}
+    scores = _payload_field_value(payload.get("scores")) or {}
+    if summaries or scores:
+        sections.append(
+            {
+                "title": "7. Scores and summaries",
+                "items": [
+                    (
+                        "Idea",
+                        _pipeline_score_text(scores.get("idea_score"), summaries.get("idea_summary")),
+                    ),
+                    (
+                        "Perception",
+                        _pipeline_score_text(scores.get("perception_score"), summaries.get("perception_summary")),
+                    ),
+                    (
+                        "Spread",
+                        _pipeline_score_text(scores.get("spread_score"), summaries.get("spread_summary")),
+                    ),
+                ],
+            }
+        )
+
+    return [section for section in sections if section["items"]]
 
 
 def _build_review_sections(review, latest_material):
-    content = _analysis_source_text(latest_material)
-    focus = _review_focus_phrase(content)
-    audience = _infer_audience(content)
-    channel = _infer_channel(content)
-    price_signal = _infer_price_signal(content)
-    trust_signal = _infer_trust_signal(content)
+    payload = _analysis_payload(latest_material)
 
     if review["key"] == "idea":
+        idea_review = _payload_field_value(payload.get("idea_review")) or {}
         return {
             "layout": "idea",
             "rows": [
-                ("Signal summary", review["summary"]),
-                ("What to do next", review["detail"]),
-                ("Focus area", f"Clarify the promise around {focus}."),
+                ("Signal summary", idea_review.get("signal_summary") or ""),
+                ("What to do next", idea_review.get("what_to_do_next") or ""),
+                ("Focus area", idea_review.get("focus_area") or ""),
             ],
             "simulation_rows": [
-                ("Audience", audience),
-                ("Perception cue", f"The idea lands best when the payoff around {focus} is visible immediately."),
-                ("Trust signal", trust_signal),
-                ("Risk signal", "Generic AI framing will reduce urgency unless the message feels concrete, specific, and safe."),
+                ("Audience", idea_review.get("audience") or ""),
+                ("Perception cue", idea_review.get("perception_cue") or ""),
+                ("Trust signal", idea_review.get("trust_signal") or ""),
+                ("Risk signal", idea_review.get("risk_signal") or ""),
             ],
             "note": "Simulation engine",
         }
 
     if review["key"] == "live_signals":
+        live_signals = _payload_field_value(payload.get("live_signals")) or {}
+        results = live_signals.get("results") or []
         return {
             "layout": "sources",
             "items": [
-                ("Search result", f"People searching for {focus} are looking for a concrete before-and-after outcome, not a broad category pitch."),
-                ("Community thread", f"{channel} is where this concept is most likely to surface early signal if the wording stays explicit."),
-                ("Buyer intent", price_signal),
-                ("Next query", f"Test demand language that pairs {focus} with a visible user payoff and a specific use case."),
+                (
+                    f"{result.get('source', 'Source').title()}: {result.get('title', 'Signal')}",
+                    result.get("snippet") or result.get("signal_strength") or "",
+                )
+                for result in results[:4]
             ],
-            "footer": "Cross-source synthesis ready",
+            "footer": live_signals.get("synthesis") or "",
         }
 
     if review["key"] == "perception":
+        perception = _payload_field_value(payload.get("perception")) or {}
+        responses = perception.get("responses") or []
         return {
             "layout": "perception",
             "responses": [
-                ("First read", f"\"This feels strongest for {focus}.\""),
-                ("Skeptical response", "\"I need to know exactly what happens after I try it.\""),
-                ("Interested response", "\"If the outcome is immediate, I would probably click.\""),
-                ("Likely reaction", "-> Interest rises when the message sounds concrete, provable, and specific."),
+                (
+                    response.get("persona_name") or "Persona",
+                    (
+                        f"Use/buy: {response.get('would_use_or_buy', '')}. "
+                        f"Price: {response.get('expected_price', '')}. "
+                        f"Worth it: {response.get('worth_it_assessment', '')}."
+                    ),
+                )
+                for response in responses[:4]
             ],
         }
 
-    spread_items = _spread_chain(content)
+    word_of_mouth = _payload_field_value(payload.get("word_of_mouth")) or {}
+    chain = word_of_mouth.get("chain") or []
     return {
         "layout": "spread",
         "items": [
-            spread_items[0],
-            spread_items[1],
-            spread_items[2],
-            spread_items[3],
-            ("Outcome", "Strong spread potential" if review["score"] and review["score"] >= 70 else "Low spread, weak clarity"),
-            ("Suggested fix", "Sharpen the hook, add a clearer outcome, and make the differentiator easier to repeat."),
-        ],
+            (
+                item.get("persona_id") or f"Hop {index + 1}",
+                item.get("retold_gist") or item.get("received_message") or "",
+            )
+            for index, item in enumerate(chain[:4])
+        ]
+        + ([("Outcome", word_of_mouth.get("summary"))] if word_of_mouth.get("summary") else []),
     }
 
 
@@ -244,34 +333,36 @@ def review_options_for_analysis(analysis_item, *, review_base_href=""):
     if not analysis_item:
         return []
 
+    payload = _analysis_payload(analysis_item)
+    is_pending = _payload_is_pending(payload)
     reviews = [
         {
             "key": "idea",
             "label": "Idea",
-            "score": analysis_item["idea_score"],
+            "score": None if is_pending else analysis_item["idea_score"],
             "summary": analysis_item["idea_summary"],
-            "detail": "Use this read to tighten the core promise, audience, and outcome before investing more effort.",
+            "pending": is_pending,
         },
         {
             "key": "live_signals",
             "label": "Live Signals",
-            "score": analysis_item["live_signal_score"],
-            "summary": analysis_item["live_signal_summary"] or "Upgrade to Starter to unlock this review.",
-            "detail": "Use this read to pressure-test demand language, search behavior, and channel fit.",
+            "score": None if is_pending else analysis_item["live_signal_score"],
+            "summary": analysis_item["live_signal_summary"] or "",
+            "pending": is_pending,
         },
         {
             "key": "perception",
             "label": "Perception",
-            "score": analysis_item["perception_score"],
-            "summary": analysis_item["perception_summary"] or "Upgrade to Pro to unlock this review.",
-            "detail": "Use this read to refine how the idea feels to the audience, especially trust and positioning.",
+            "score": None if is_pending else analysis_item["perception_score"],
+            "summary": analysis_item["perception_summary"] or "",
+            "pending": is_pending,
         },
         {
             "key": "spread",
             "label": "Spread",
-            "score": analysis_item["spread_score"],
-            "summary": analysis_item["spread_summary"] or "Upgrade to Pro to unlock this review.",
-            "detail": "Use this read to improve retellability and make the concept easier to carry from person to person.",
+            "score": None if is_pending else analysis_item["spread_score"],
+            "summary": analysis_item["spread_summary"] or "",
+            "pending": is_pending,
         },
     ]
 
@@ -287,6 +378,19 @@ def build_signal_snapshot(analysis_item):
     if not analysis_item:
         return None
 
+    payload = _analysis_payload(analysis_item)
+    if _payload_is_pending(payload):
+        return {
+            "interest": 0,
+            "summary": "Analysis pending.",
+            "bars": [
+                {"label": "Willingness to pay", "value": 0},
+                {"label": "Initial clarity", "value": 0},
+                {"label": "Skepticism risk", "value": 0},
+            ],
+            "note": "Queued for processing.",
+        }
+
     idea_score = _score_or_fallback(analysis_item.get("idea_score"), 0)
     live_signal_score = _score_or_fallback(analysis_item.get("live_signal_score"), idea_score)
     perception_score = _score_or_fallback(analysis_item.get("perception_score"), idea_score)
@@ -297,7 +401,7 @@ def build_signal_snapshot(analysis_item):
     clarity = round((idea_score + spread_score) / 2)
     skepticism = round(max(0, min(100, 100 - perception_score)))
 
-    summary = analysis_item.get("idea_summary") or "The strongest responses appear when the payoff is clear right away."
+    summary = analysis_item.get("idea_summary") or ""
 
     return {
         "interest": interest,
@@ -307,7 +411,7 @@ def build_signal_snapshot(analysis_item):
             {"label": "Initial clarity", "value": clarity},
             {"label": "Skepticism risk", "value": skepticism},
         ],
-        "note": "Signal first, before deeper positioning and spread work.",
+        "note": "",
     }
 
 
@@ -381,6 +485,7 @@ def test_result_page_context(user, test, *, error="", status_message=""):
         "test": test,
         "reviews": reviews,
         "initial_review_key": initial_review_key,
+        "pipeline_sections": pipeline_sections_for_item(test),
         "signal_snapshot": build_signal_snapshot(test),
         "error": error,
         "status_message": status_message,
@@ -407,6 +512,7 @@ def project_detail_page_context(user, project, *, error="", status_message=""):
         "project": project,
         "materials": materials,
         "latest_material": latest_material,
+        "pipeline_sections": pipeline_sections_for_item(latest_material) if latest_material else [],
         "signal_snapshot": build_signal_snapshot(latest_material),
         "reviews": reviews,
         "initial_review_key": initial_review_key,
