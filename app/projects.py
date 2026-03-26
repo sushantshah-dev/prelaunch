@@ -1,11 +1,14 @@
+import json
+
 from db import db_connection
 from credits import (
-    consume_user_credit,
+    consume_user_credit_in_transaction,
     credit_error_message,
     project_creation_credit_cost,
     project_test_credit_cost,
     standalone_test_credit_cost,
 )
+from analysis_queue import enqueue_analysis_job
 
 
 def _project_from_row(row):
@@ -22,28 +25,6 @@ def _project_from_row(row):
     }
 
 
-def _score_for(prompt, stage, minimum, maximum):
-    span = maximum - minimum
-    seed = sum(ord(character) for character in f"{prompt}:{stage}")
-    return round(minimum + (seed % (span + 1)), 1)
-
-
-def _clamp(value, minimum=0, maximum=100):
-    return round(max(minimum, min(maximum, value)), 1)
-
-
-def _extract_keywords(prompt):
-    seen = []
-    for word in prompt.replace("\n", " ").split():
-        normalized = word.strip(".,!?;:()[]{}\"'").lower()
-        if len(normalized) < 5 or normalized in seen:
-            continue
-        seen.append(normalized)
-        if len(seen) == 3:
-            break
-    return seen
-
-
 def _project_name_from_prompt(prompt):
     clean_prompt = " ".join(prompt.split())
     if not clean_prompt:
@@ -56,162 +37,90 @@ def _project_name_from_prompt(prompt):
     return trimmed.title() or "Untitled Project"
 
 
-def _contains_any(text, phrases):
-    return any(phrase in text for phrase in phrases)
+def _validate_project_fields(name, description):
+    cleaned_name = " ".join((name or "").split())
+    cleaned_description = " ".join((description or "").split())
+
+    if not cleaned_name:
+        raise ValueError("Project name is required.")
+    if len(cleaned_name) > 80:
+        raise ValueError("Project name must be 80 characters or fewer.")
+    if len(cleaned_description) > 280:
+        raise ValueError("Project description must be 280 characters or fewer.")
+
+    return cleaned_name, cleaned_description
 
 
-def _score_breakdown(prompt):
-    clean_prompt = " ".join(prompt.split())
-    lower = clean_prompt.lower()
-    words = clean_prompt.split()
-    word_count = len(words)
-    sentence_count = max(1, sum(clean_prompt.count(mark) for mark in ".!?"))
+def _validate_prompt_content(content, *, field_label="Prompt"):
+    cleaned_content = " ".join((content or "").split())
+    if not cleaned_content:
+        raise ValueError(f"{field_label} is required.")
+    if len(cleaned_content) > 4000:
+        raise ValueError(f"{field_label} must be 4000 characters or fewer.")
+    return cleaned_content
 
-    has_audience = _contains_any(
-        lower,
-        ("for ", "founder", "team", "creator", "marketer", "designer", "parent", "developer", "student", "seller"),
+
+def _pending_field(value):
+    return {"status": "pending", "value": value}
+
+
+def build_analysis(prompt, plan, *, mode="idea", context_label="this concept", target_type, target_id):
+    clean_prompt = " ".join((prompt or "").split())
+    if not clean_prompt:
+        raise ValueError("Prompt is required.")
+
+    queue_job = enqueue_analysis_job(
+        target_type=target_type,
+        target_id=target_id,
+        prompt=clean_prompt,
+        plan=plan,
+        mode=mode,
+        context_label=context_label,
     )
-    has_outcome = _contains_any(
-        lower,
-        ("help", "reduce", "increase", "save", "improve", "faster", "easier", "without", "so that"),
+    print(
+        "[projects] build_analysis queued "
+        f"job_id={queue_job['id']} target_type={target_type} target_id={target_id} "
+        f"plan={plan} mode={mode}",
+        flush=True,
     )
-    has_differentiator = _contains_any(
-        lower,
-        ("instead of", "unlike", "first", "only", "different", "unique", "better", "faster"),
-    )
-    has_distribution = _contains_any(
-        lower,
-        ("share", "viral", "invite", "community", "creator", "audience", "referral", "social", "newsletter"),
-    )
-    has_signal = _contains_any(
-        lower,
-        ("search", "demand", "market", "reddit", "trend", "signal", "volume", "community", "keyword"),
-    )
-    has_price = _contains_any(
-        lower,
-        ("price", "pricing", "$", "subscription", "plan", "monthly", "annual"),
-    )
-    has_proof = _contains_any(
-        lower,
-        ("proof", "data", "evidence", "pilot", "users", "customers", "results", "traction"),
-    )
-
-    concise_range = 20 <= word_count <= 90
-    clear_length = 35 <= word_count <= 140
-
-    idea_score = 46
-    if clear_length:
-        idea_score += 10
-    if has_audience:
-        idea_score += 9
-    if has_outcome:
-        idea_score += 10
-    if has_differentiator:
-        idea_score += 8
-    if sentence_count > 1:
-        idea_score += 4
-
-    live_signal_score = 42
-    if has_signal:
-        live_signal_score += 12
-    if has_distribution:
-        live_signal_score += 11
-    if has_outcome:
-        live_signal_score += 6
-    if has_price:
-        live_signal_score += 5
-
-    perception_score = 44
-    if has_audience:
-        perception_score += 11
-    if has_outcome:
-        perception_score += 10
-    if has_price:
-        perception_score += 8
-    if has_proof:
-        perception_score += 7
-
-    spread_score = 43
-    if concise_range:
-        spread_score += 12
-    if has_outcome:
-        spread_score += 7
-    if has_differentiator:
-        spread_score += 8
-    if has_distribution:
-        spread_score += 6
 
     return {
-        "clean_prompt": clean_prompt,
-        "word_count": word_count,
-        "sentence_count": sentence_count,
-        "keywords": _extract_keywords(clean_prompt),
-        "has_audience": has_audience,
-        "has_outcome": has_outcome,
-        "has_differentiator": has_differentiator,
-        "has_distribution": has_distribution,
-        "has_signal": has_signal,
-        "has_price": has_price,
-        "has_proof": has_proof,
-        "idea_score": _clamp(idea_score),
-        "live_signal_score": _clamp(live_signal_score),
-        "perception_score": _clamp(perception_score),
-        "spread_score": _clamp(spread_score),
-    }
-
-
-def build_analysis(prompt, plan, *, mode="idea", context_label="this concept"):
-    clean_prompt = " ".join(prompt.split())
-    breakdown = _score_breakdown(clean_prompt)
-    keywords = breakdown["keywords"]
-    focus = ", ".join(keywords) if keywords else "the clearest user pain"
-    snippet = clean_prompt[:180]
-    normalized_mode = normalize_test_mode(mode)
-
-    idea_score = breakdown["idea_score"] + (4 if normalized_mode == "idea" else 0)
-    live_signal_score = breakdown["live_signal_score"] + (5 if normalized_mode == "live_signals" else 0)
-    perception_score = breakdown["perception_score"] + (5 if normalized_mode == "perception" else 0)
-    spread_score = breakdown["spread_score"] + (5 if normalized_mode == "spread" else 0)
-
-    analysis = {
-        "idea_score": _clamp(idea_score),
-        "idea_summary": (
-            f"{context_label.capitalize()} is strongest when it stays centered on {focus}. "
-            f"{'The audience is clear. ' if breakdown['has_audience'] else 'The audience still needs to be named more explicitly. '}"
-            f"{'The outcome is easy to see.' if breakdown['has_outcome'] else 'The outcome should be stated more directly.'}"
-        ),
+        "idea_score": 0,
+        "idea_summary": "",
         "live_signal_score": None,
         "live_signal_summary": "",
         "perception_score": None,
         "perception_summary": "",
         "spread_score": None,
         "spread_summary": "",
-        "prompt_preview": snippet,
+        "prompt_preview": clean_prompt[:180],
+        "persona_count_per_test": 0,
+        "analysis_payload": {
+            "status": "pending",
+            "job": queue_job,
+            "target_audience": _pending_field(""),
+            "personas": _pending_field([]),
+            "questionnaire_responses": _pending_field([]),
+            "idea_review": _pending_field({}),
+            "perception": _pending_field({"responses": [], "summary": ""}),
+            "word_of_mouth": _pending_field({"order": [], "chain": [], "summary": ""}),
+            "scores": _pending_field(
+                {
+                    "idea_score": None,
+                    "perception_score": None,
+                    "spread_score": None,
+                }
+            ),
+            "summaries": _pending_field(
+                {
+                    "idea_summary": "",
+                    "perception_summary": "",
+                    "spread_summary": "",
+                }
+            ),
+            "live_signals": _pending_field(None),
+        },
     }
-
-    if plan in {"Starter", "Pro"}:
-        analysis["live_signal_score"] = _clamp(live_signal_score)
-        analysis["live_signal_summary"] = (
-            f"Live-signal readiness improves when the language stays searchable around {focus}. "
-            f"{'The prompt already hints at channels or demand sources. ' if breakdown['has_signal'] or breakdown['has_distribution'] else 'Add channel, market, or demand language to make external signal easier to read. '}"
-            f"{'Pricing context is present.' if breakdown['has_price'] else 'A pricing or plan cue would make market intent easier to judge.'}"
-        )
-
-    if plan == "Pro":
-        analysis["perception_score"] = _clamp(perception_score)
-        analysis["perception_summary"] = (
-            f"Perception is driven by how clearly the promise lands for a specific audience. "
-            f"{'The framing leans outcome-first. ' if breakdown['has_outcome'] else 'Shift the framing away from mechanics and toward user payoff. '}"
-            f"{'Trust signals are present.' if breakdown['has_proof'] else 'Proof, credibility, or concrete examples would make this feel safer and more premium.'}"
-        )
-        analysis["spread_score"] = _clamp(spread_score)
-        analysis["spread_summary"] = (
-            f"Spread is healthiest when someone can retell the idea in one sentence. "
-            f"{'The pitch is compact enough to travel. ' if 20 <= breakdown['word_count'] <= 90 else 'Trim the pitch so the core claim is easier to repeat. '}"
-            f"{'There is a noticeable differentiator.' if breakdown['has_differentiator'] else 'A sharper contrast or differentiator would improve retellability.'}"
-        )
-
-    return analysis
 
 
 def _material_from_row(row):
@@ -227,7 +136,8 @@ def _material_from_row(row):
         "live_signal_summary": row[8],
         "perception_summary": row[9],
         "spread_summary": row[10],
-        "created_at": row[11],
+        "analysis_payload": row[11] or {},
+        "created_at": row[12],
     }
 
 
@@ -245,7 +155,8 @@ def _one_off_test_from_row(row):
         "live_signal_summary": row[9],
         "perception_summary": row[10],
         "spread_summary": row[11],
-        "created_at": row[12],
+        "analysis_payload": row[12] or {},
+        "created_at": row[13],
     }
 
 
@@ -343,13 +254,18 @@ def get_project_stats(user_id):
 
 
 def create_project(user_id, name, description, plan, charge_credit=True):
-    if charge_credit:
-        credit_state = consume_user_credit(user_id, plan, project_creation_credit_cost())
-        if credit_state is False:
-            raise ValueError(credit_error_message(plan))
-
+    cleaned_name, cleaned_description = _validate_project_fields(name, description)
     with db_connection() as conn:
         with conn.cursor() as cur:
+            if charge_credit:
+                credit_state = consume_user_credit_in_transaction(
+                    cur,
+                    user_id,
+                    plan,
+                    project_creation_credit_cost(),
+                )
+                if credit_state is False:
+                    raise ValueError(credit_error_message(plan))
             cur.execute(
                 """
                 INSERT INTO projects (
@@ -366,14 +282,15 @@ def create_project(user_id, name, description, plan, charge_credit=True):
                 """,
                 (
                     user_id,
-                    name.strip(),
-                    description.strip(),
+                    cleaned_name,
+                    cleaned_description,
                 ),
             )
             return cur.fetchone()[0]
 
 
 def update_project(user_id, project_id, name, description):
+    cleaned_name, cleaned_description = _validate_project_fields(name, description)
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -386,8 +303,8 @@ def update_project(user_id, project_id, name, description):
                 WHERE id = %s AND user_id = %s
                 """,
                 (
-                    name.strip(),
-                    description.strip(),
+                    cleaned_name,
+                    cleaned_description,
                     project_id,
                     user_id,
                 ),
@@ -422,6 +339,7 @@ def list_project_materials(user_id, project_id):
                     project_materials.live_signal_summary,
                     project_materials.perception_summary,
                     project_materials.spread_summary,
+                    project_materials.analysis_payload,
                     project_materials.created_at
                 FROM project_materials
                 JOIN projects ON projects.id = project_materials.project_id
@@ -436,8 +354,13 @@ def list_project_materials(user_id, project_id):
 
 
 def create_project_material(user_id, project_id, content, plan, mode="idea", charge_credit=True):
-    analysis = build_analysis(content, plan, mode=mode, context_label="this project")
-
+    cleaned_content = _validate_prompt_content(content, field_label="Material")
+    print(
+        "[projects] create_project_material "
+        f"user_id={user_id} project_id={project_id} plan={plan} mode={mode} "
+        f"charge_credit={charge_credit} content={cleaned_content[:180]!r}",
+        flush=True,
+    )
     with db_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -454,7 +377,12 @@ def create_project_material(user_id, project_id, content, plan, mode="idea", cha
                 return None
 
             if charge_credit:
-                credit_state = consume_user_credit(user_id, plan, project_test_credit_cost())
+                credit_state = consume_user_credit_in_transaction(
+                    cur,
+                    user_id,
+                    plan,
+                    project_test_credit_cost(),
+                )
                 if credit_state is False:
                     raise ValueError(credit_error_message(plan))
 
@@ -470,14 +398,52 @@ def create_project_material(user_id, project_id, content, plan, mode="idea", cha
                     idea_summary,
                     live_signal_summary,
                     perception_summary,
-                    spread_summary
+                    spread_summary,
+                    analysis_payload
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
                     project_id,
-                    content.strip(),
+                    cleaned_content,
+                    0,
+                    None,
+                    None,
+                    None,
+                    "pending",
+                    "pending",
+                    "pending",
+                    "pending",
+                    json.dumps({"status": "pending"}),
+                ),
+            )
+            material_id = cur.fetchone()[0]
+            analysis = build_analysis(
+                cleaned_content,
+                plan,
+                mode=mode,
+                context_label="this project",
+                target_type="project_material",
+                target_id=material_id,
+            )
+
+            cur.execute(
+                """
+                UPDATE project_materials
+                SET
+                    idea_score = %s,
+                    live_signal_score = %s,
+                    perception_score = %s,
+                    spread_score = %s,
+                    idea_summary = %s,
+                    live_signal_summary = %s,
+                    perception_summary = %s,
+                    spread_summary = %s,
+                    analysis_payload = %s
+                WHERE id = %s
+                """,
+                (
                     analysis["idea_score"],
                     analysis["live_signal_score"],
                     analysis["perception_score"],
@@ -486,9 +452,10 @@ def create_project_material(user_id, project_id, content, plan, mode="idea", cha
                     analysis["live_signal_summary"],
                     analysis["perception_summary"],
                     analysis["spread_summary"],
+                    json.dumps(analysis["analysis_payload"]),
+                    material_id,
                 ),
             )
-            material_id = cur.fetchone()[0]
 
             cur.execute(
                 """
@@ -516,13 +483,22 @@ def create_project_material(user_id, project_id, content, plan, mode="idea", cha
 
 def create_one_off_test(user_id, prompt, plan, mode):
     normalized_mode = normalize_test_mode(mode)
-    analysis = build_analysis(prompt, plan, mode=normalized_mode)
-    credit_state = consume_user_credit(user_id, plan, standalone_test_credit_cost())
-    if credit_state is False:
-        raise ValueError(credit_error_message(plan))
-
+    cleaned_prompt = _validate_prompt_content(prompt)
+    print(
+        "[projects] create_one_off_test "
+        f"user_id={user_id} plan={plan} mode={normalized_mode} prompt={cleaned_prompt[:180]!r}",
+        flush=True,
+    )
     with db_connection() as conn:
         with conn.cursor() as cur:
+            credit_state = consume_user_credit_in_transaction(
+                cur,
+                user_id,
+                plan,
+                standalone_test_credit_cost(),
+            )
+            if credit_state is False:
+                raise ValueError(credit_error_message(plan))
             cur.execute(
                 """
                 INSERT INTO one_off_tests (
@@ -536,15 +512,51 @@ def create_one_off_test(user_id, prompt, plan, mode):
                     idea_summary,
                     live_signal_summary,
                     perception_summary,
-                    spread_summary
+                    spread_summary,
+                    analysis_payload
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
                     user_id,
                     normalized_mode,
-                    prompt.strip(),
+                    cleaned_prompt,
+                    0,
+                    None,
+                    None,
+                    None,
+                    "pending",
+                    "pending",
+                    "pending",
+                    "pending",
+                    json.dumps({"status": "pending"}),
+                ),
+            )
+            test_id = cur.fetchone()[0]
+            analysis = build_analysis(
+                cleaned_prompt,
+                plan,
+                mode=normalized_mode,
+                target_type="one_off_test",
+                target_id=test_id,
+            )
+            cur.execute(
+                """
+                UPDATE one_off_tests
+                SET
+                    idea_score = %s,
+                    live_signal_score = %s,
+                    perception_score = %s,
+                    spread_score = %s,
+                    idea_summary = %s,
+                    live_signal_summary = %s,
+                    perception_summary = %s,
+                    spread_summary = %s,
+                    analysis_payload = %s
+                WHERE id = %s
+                """,
+                (
                     analysis["idea_score"],
                     analysis["live_signal_score"],
                     analysis["perception_score"],
@@ -553,9 +565,11 @@ def create_one_off_test(user_id, prompt, plan, mode):
                     analysis["live_signal_summary"],
                     analysis["perception_summary"],
                     analysis["spread_summary"],
+                    json.dumps(analysis["analysis_payload"]),
+                    test_id,
                 ),
             )
-            return cur.fetchone()[0]
+            return test_id
 
 
 def convert_one_off_test_to_project(user_id, test_id, plan):
@@ -592,6 +606,7 @@ def get_one_off_test(user_id, test_id):
                     live_signal_summary,
                     perception_summary,
                     spread_summary,
+                    analysis_payload,
                     created_at
                 FROM one_off_tests
                 WHERE id = %s AND user_id = %s
@@ -625,6 +640,7 @@ def list_recent_one_off_tests(user_id, limit=6):
                     live_signal_summary,
                     perception_summary,
                     spread_summary,
+                    analysis_payload,
                     created_at
                 FROM one_off_tests
                 WHERE user_id = %s
