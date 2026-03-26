@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import psycopg
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from config import ALLOWED_PLANS, SESSION_COOKIE_NAME, SESSION_DAYS
+from config import ALLOWED_PLANS, SESSION_COOKIE_NAME, SESSION_COOKIE_SECURE, SESSION_DAYS
 from credits import get_user_credit_state
 from db import db_connection
 
@@ -25,6 +25,7 @@ def set_session_cookie(response, token):
         max_age=SESSION_DAYS * 24 * 60 * 60,
         httponly=True,
         samesite="Lax",
+        secure=SESSION_COOKIE_SECURE,
         path="/",
     )
 
@@ -36,11 +37,19 @@ def clear_session_cookie(response):
         max_age=0,
         httponly=True,
         samesite="Lax",
+        secure=SESSION_COOKIE_SECURE,
         path="/",
     )
 
 
+def cleanup_expired_sessions():
+    with db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM sessions WHERE expires_at <= NOW()")
+
+
 def create_session(user_id):
+    cleanup_expired_sessions()
     token = secrets.token_hex(32)
     token_hash = sha256(token)
     expires_at = datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)

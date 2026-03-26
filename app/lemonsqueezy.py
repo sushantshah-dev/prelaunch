@@ -170,11 +170,13 @@ def cancel_subscription(subscription_id):
 
 
 def build_return_url(app_url, suffix=""):
-    base = f"{app_url.rstrip('/')}{BASE_PATH}/billing"
+    base = f"{app_url.rstrip('/')}{BASE_PATH}/settings"
     return f"{base}{suffix}"
 
 
 def create_checkout_url(user, plan, app_url):
+    # TODO: Add idempotency protection around checkout creation so refresh/retry flows
+    # cannot accidentally create duplicate billing attempts.
     variant_id = get_variant_id_for_plan(plan)
     response = api_request(
         "POST",
@@ -384,6 +386,7 @@ def update_user_billing_state(user_id, *, customer_id=None, subscription_id=None
 
 
 def sync_user_subscription(user):
+    # TODO: Move subscription sync to webhook-driven state changes with polling only as fallback.
     if not is_enabled():
         return {
             **user,
