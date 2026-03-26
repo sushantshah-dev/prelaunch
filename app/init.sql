@@ -127,6 +127,23 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE INDEX IF NOT EXISTS projects_user_id_idx
 ON projects (user_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS personas (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    persona_key TEXT NOT NULL,
+    display_name TEXT NOT NULL DEFAULT '',
+    profile JSONB NOT NULL DEFAULT '{}'::jsonb,
+    chat_history JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS personas_project_persona_key_idx
+ON personas (project_id, persona_key);
+
+CREATE INDEX IF NOT EXISTS personas_project_updated_at_idx
+ON personas (project_id, updated_at DESC);
+
 CREATE TABLE IF NOT EXISTS project_pipeline_runs (
     id BIGSERIAL PRIMARY KEY,
     project_id BIGINT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -142,6 +159,31 @@ CREATE TABLE IF NOT EXISTS project_pipeline_runs (
 CREATE INDEX IF NOT EXISTS project_pipeline_runs_project_id_idx
 ON project_pipeline_runs (project_id, updated_at DESC);
 
+CREATE TABLE IF NOT EXISTS analysis_jobs (
+    id BIGSERIAL PRIMARY KEY,
+    target_type TEXT NOT NULL,
+    target_id BIGINT NOT NULL,
+    prompt TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'idea',
+    context_label TEXT NOT NULL DEFAULT 'this concept',
+    status TEXT NOT NULL DEFAULT 'pending',
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    worker_id TEXT,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    last_error TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS analysis_jobs_status_created_at_idx
+ON analysis_jobs (status, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS analysis_jobs_target_idx
+ON analysis_jobs (target_type, target_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS project_materials (
     id BIGSERIAL PRIMARY KEY,
     project_id BIGINT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -154,6 +196,7 @@ CREATE TABLE IF NOT EXISTS project_materials (
     live_signal_summary TEXT NOT NULL DEFAULT '',
     perception_summary TEXT NOT NULL DEFAULT '',
     spread_summary TEXT NOT NULL DEFAULT '',
+    analysis_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -173,6 +216,7 @@ CREATE TABLE IF NOT EXISTS one_off_tests (
     live_signal_summary TEXT NOT NULL DEFAULT '',
     perception_summary TEXT NOT NULL DEFAULT '',
     spread_summary TEXT NOT NULL DEFAULT '',
+    analysis_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
