@@ -129,20 +129,26 @@ def project_test_credit_cost():
 def consume_user_credit(user_id, plan, amount):
     with db_connection() as conn:
         with conn.cursor() as cur:
-            state = _apply_credit_policy(cur, user_id, plan)
-            if not state:
-                return None
-            if state["credits_remaining"] < amount:
-                return False
+            return consume_user_credit_in_transaction(cur, user_id, plan, amount)
 
-            next_remaining = state["credits_remaining"] - amount
-            cur.execute(
-                """
-                UPDATE users
-                SET credits_remaining = %s
-                WHERE id = %s
-                """,
-                (next_remaining, user_id),
-            )
-            state["credits_remaining"] = next_remaining
-            return state
+
+def consume_user_credit_in_transaction(cur, user_id, plan, amount):
+    with db_connection() as conn:
+        pass
+    state = _apply_credit_policy(cur, user_id, plan)
+    if not state:
+        return None
+    if state["credits_remaining"] < amount:
+        return False
+
+    next_remaining = state["credits_remaining"] - amount
+    cur.execute(
+        """
+        UPDATE users
+        SET credits_remaining = %s
+        WHERE id = %s
+        """,
+        (next_remaining, user_id),
+    )
+    state["credits_remaining"] = next_remaining
+    return state
