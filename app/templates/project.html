@@ -49,7 +49,7 @@
             <div class="project-dashboard-grid">
               {% for review in reviews %}
                 <button
-                  class="analysis-card analysis-link{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none %} is-locked{% endif %}"
+                  class="analysis-card analysis-link{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none and not review.pending %} is-locked{% endif %}"
                   type="button"
                   data-review-control
                   data-review-key="{{ review.key }}"
@@ -60,6 +60,8 @@
                     <div class="analysis-score">
                       {% if review.score is not none %}
                         {{ "%.0f"|format(review.score) }}
+                      {% elif review.pending %}
+                        Pending
                       {% else %}
                         Locked
                       {% endif %}
@@ -95,7 +97,7 @@
               >
                 {% for review in reviews %}
                   <section
-                    class="review-slide{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none %} is-locked{% endif %}"
+                    class="review-slide{% if initial_review_key == review.key %} is-active{% endif %}{% if review.score is none and not review.pending %} is-locked{% endif %}"
                     data-review-slide="{{ review.key }}"
                     aria-hidden="{% if initial_review_key == review.key %}false{% else %}true{% endif %}"
                   >
@@ -108,6 +110,8 @@
                         <div class="analysis-score">
                           {% if review.score is not none %}
                             {{ "%.0f"|format(review.score) }}
+                          {% elif review.pending %}
+                            Pending
                           {% else %}
                             Locked
                           {% endif %}
@@ -171,6 +175,35 @@
                   </section>
                 {% endfor %}
               </div>
+            </div>
+          </div>
+        </article>
+      {% endif %}
+
+      {% if pipeline_sections %}
+        <article class="panel test-result-card">
+          <div class="test-result-inner">
+            <div class="section-head compact">
+              <div>
+                <div class="meta">Pipeline run</div>
+                <h2>Step-by-step output from the latest project analysis.</h2>
+              </div>
+            </div>
+
+            <div class="pipeline-grid">
+              {% for section in pipeline_sections %}
+                <section class="pipeline-card">
+                  <div class="pipeline-title">{{ section["title"] }}</div>
+                  <div class="terminal-stack">
+                    {% for item in section["items"] %}
+                      <article class="terminal-block">
+                        <div class="terminal-kicker">{{ item[0] }}</div>
+                        <div class="terminal-text">{{ item[1] }}</div>
+                      </article>
+                    {% endfor %}
+                  </div>
+                </section>
+              {% endfor %}
             </div>
           </div>
         </article>

@@ -298,6 +298,30 @@
     linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
 }
 
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pipeline-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    radial-gradient(circle at top left, rgba(118,167,255,0.1), transparent 34%),
+    rgba(255,255,255,0.03);
+}
+
+.pipeline-title {
+  color: rgba(243,246,255,0.95);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 .review-grid-split {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
